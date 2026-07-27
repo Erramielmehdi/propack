@@ -1,0 +1,231 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ==========================================================================
+   ProPack — "The Dieline" base styles
+   ========================================================================== */
+
+@layer base {
+  :root {
+    --font-playfair: "Cormorant Garamond";
+    --font-lato: "Archivo";
+    --font-mono: "IBM Plex Mono";
+
+    /* shadcn design tokens — white theme, mapped to the logo's coral.
+       Used by components/ui/button.tsx and the animated hero. */
+    --background: 0 0% 100%;
+    --foreground: 25 14% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 25 14% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 25 14% 12%;
+    --primary: 8 62% 55%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 30 30% 95%;
+    --secondary-foreground: 25 14% 12%;
+    --muted: 30 24% 94%;
+    --muted-foreground: 25 10% 42%;
+    --accent: 8 55% 93%;
+    --accent-foreground: 8 55% 40%;
+    --destructive: 0 65% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 25 20% 85%;
+    --input: 25 20% 85%;
+    --ring: 8 62% 55%;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    /* Larger base type for readability — every Tailwind rem-based size
+       (headings, body, buttons, labels, spacing) scales from this root.
+       A percentage keeps the visitor's own browser font size as the
+       reference, so this stacks with their accessibility zoom instead of
+       overriding it. */
+    font-size: 112.5%; /* ~18px on a default 16px root */
+  }
+
+  /* Gentler bump on small phones so tight layouts (wizard nav, CTAs) don't
+     overflow. */
+  @media (max-width: 640px) {
+    html {
+      font-size: 106.25%; /* ~17px */
+    }
+  }
+
+  body {
+    @apply bg-noir text-cream font-sans antialiased;
+    /* Clean white with a soft coral wash — one hue per corner. */
+    background:
+      radial-gradient(38% 30% at 8% 6%, rgba(240, 128, 106, 0.09), transparent 62%),
+      radial-gradient(40% 30% at 92% 10%, rgba(214, 92, 68, 0.07), transparent 62%),
+      radial-gradient(42% 34% at 88% 90%, rgba(240, 128, 106, 0.07), transparent 62%),
+      radial-gradient(40% 32% at 6% 94%, rgba(214, 92, 68, 0.05), transparent 62%),
+      #ffffff;
+    background-attachment: fixed;
+    min-height: 100vh;
+  }
+
+  /* Paper grain — these are physical board boxes.
+     Negative z-index keeps it behind normal-flow content without forcing
+     every body child into position:relative (that used to trap <main> in
+     its own stacking context, which broke fixed overlays like the mobile
+     menu and full-page modals from ever painting above one another). */
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.05;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-display;
+  }
+
+  h1 em,
+  h2 em,
+  h3 em {
+    @apply not-italic text-gold-light;
+  }
+
+  ::selection {
+    background: rgba(214, 92, 68, 0.28);
+    color: #241f1a;
+  }
+
+  :focus-visible {
+    outline: 2px solid #d65c44;
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+}
+
+@layer components {
+  /* Technical spec-sheet label (IBM Plex Mono). */
+  .label-track {
+    @apply font-mono text-[0.7rem] font-medium uppercase tracking-tech text-gold;
+  }
+
+  /* Generic mono utility for dimensions/data. */
+  .tech {
+    @apply font-mono tabular-nums;
+  }
+
+  /* Card surface: a whiter sheet of paper laid on the board, held by
+     an ink hairline — the editorial rule, not a tinted border. */
+  .surface {
+    background: #fdfaf6;
+    border: 1px solid rgba(36, 31, 26, 0.14);
+    box-shadow: 0 1px 2px rgba(36, 31, 26, 0.04);
+  }
+
+  /* Angled gold button clip — echoes a box corner. */
+  .clip-angled {
+    clip-path: polygon(7px 0%, 100% 0%, calc(100% - 7px) 100%, 0% 100%);
+  }
+
+  /* Light sweep on hover — used by finish swatches to suggest foil/gloss. */
+  .sheen {
+    position: relative;
+    overflow: hidden;
+  }
+  .sheen::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: -60%;
+    width: 40%;
+    /* Animate transform (GPU) rather than `left` (layout/paint). The 475%
+       translate on a 40%-wide bar equals the old -60%->130% sweep. */
+    transform: translateX(0) skewX(-20deg);
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.55), transparent);
+    transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+    pointer-events: none;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .group:hover .sheen::after,
+    .sheen:hover::after {
+      transform: translateX(475%) skewX(-20deg);
+    }
+  }
+
+  /* Blueprint grid — faint graph-paper backdrop for technical sections. */
+  .blueprint {
+    background-image:
+      linear-gradient(rgba(214, 92, 68, 0.09) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(214, 92, 68, 0.09) 1px, transparent 1px);
+    background-size: 44px 44px;
+    -webkit-mask-image: radial-gradient(75% 75% at 50% 40%, #000 40%, transparent 100%);
+    mask-image: radial-gradient(75% 75% at 50% 40%, #000 40%, transparent 100%);
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Widow control for multi-line body copy (intros, descriptions). */
+  .text-pretty {
+    text-wrap: pretty;
+  }
+
+  /* Draw-on stroke animation for the technical cylinder. */
+  .stroke-draw {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: draw 1.4s ease forwards;
+  }
+
+  .scroll-slim {
+    scrollbar-width: thin;
+    scrollbar-color: #d65c4466 transparent;
+  }
+  .scroll-slim::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  .scroll-slim::-webkit-scrollbar-thumb {
+    background: #d65c4466;
+    border-radius: 8px;
+  }
+  .scroll-slim::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  /* Staggered hero entrance — same fade-in-up keyframe, increasing delay. */
+  .animate-fade-slide-in-1 {
+    animation: fade-in-up 0.6s ease-out both;
+  }
+  .animate-fade-slide-in-2 {
+    animation: fade-in-up 0.6s 0.1s ease-out both;
+  }
+  .animate-fade-slide-in-3 {
+    animation: fade-in-up 0.6s 0.2s ease-out both;
+  }
+  .animate-fade-slide-in-4 {
+    animation: fade-in-up 0.6s 0.3s ease-out both;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .stroke-draw {
+    stroke-dashoffset: 0;
+  }
+}
