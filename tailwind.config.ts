@@ -131,7 +131,10 @@ const config: Config = {
         "fade-in-up": "fade-in-up 0.6s ease-out both",
       },
       maxWidth: {
-        content: "1200px",
+        // Fluid cap: hugs 94% of the viewport on laptops (~1200px at 1280px
+        // wide, matching the old fixed value) but keeps growing on real
+        // desktop monitors instead of stalling at a flat 1200px everywhere.
+        content: "min(94vw, 1600px)",
       },
     },
   },
