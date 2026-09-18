@@ -14,11 +14,6 @@ export const SITE = {
   email: "contact@propack.ma",
   address: "Zone Industrielle Aïn Sebaâ, Casablanca, Maroc",
   hours: "Lun – Sam : 8h30 – 18h30",
-  socials: {
-    instagram: "https://instagram.com/propack.ma",
-    facebook: "https://facebook.com/propack.ma",
-    linkedin: "https://linkedin.com/company/propack-ma",
-  },
 } as const;
 
 export const NAV_LINKS = [

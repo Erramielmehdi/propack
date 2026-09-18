@@ -1,7 +1,7 @@
 "use client";
 
 import StaggeredMenu from "@/components/ui/StaggeredMenu";
-import { NAV_LINKS, SITE } from "@/lib/content";
+import { NAV_LINKS } from "@/lib/content";
 
 /**
  * Site navigation — the React Bits StaggeredMenu configured for ProPack.
@@ -22,21 +22,13 @@ export function SiteMenu() {
     },
   ];
 
-  const socialItems = [
-    { label: "Instagram", link: SITE.socials.instagram },
-    { label: "Facebook", link: SITE.socials.facebook },
-    { label: "LinkedIn", link: SITE.socials.linkedin },
-    { label: "WhatsApp", link: `https://wa.me/${SITE.whatsapp}` },
-  ];
-
   return (
     <StaggeredMenu
       className="md:hidden"
       position="right"
       isFixed
       items={items}
-      socialItems={socialItems}
-      displaySocials
+      displaySocials={false}
       displayItemNumbering
       logoUrl="/propack-logo.png"
       menuButtonColor="#241F1A"
