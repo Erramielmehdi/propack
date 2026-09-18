@@ -5,23 +5,31 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useReducedMotion } from "framer-motion";
 
 /**
- * Showcase carousel of the promotional slides in public/slides (1–15.jpg).
+ * Showcase carousel of the promotional slides in public/slides (1–15.jpg and 16–30.png).
  * The banners already carry their own logo/copy, so this is a chromeless
  * image slider — crossfade, autoplay (paused on hover / disabled for reduced
  * motion), prev-next, swipe, and a dieline-style counter. Displayed at the
  * banners' native ~3:1 ratio so nothing is cropped.
  */
-const SLIDE_COUNT = 15;
-const SLIDES = Array.from({ length: SLIDE_COUNT }, (_, i) => `/slides/${i + 1}.jpg`);
+const SLIDE_COUNT = 30;
+const SLIDES = Array.from(
+  { length: SLIDE_COUNT },
+  (_, i) => `/slides/${i + 1}.${i < 15 ? "jpg" : "png"}`,
+).filter((_, i) => i !== 6 && i !== 11);
 const AUTOPLAY_MS = 5000;
 const SWIPE_THRESHOLD = 40;
 
+function shuffledSlides() {
+  return [...SLIDES].sort(() => Math.random() - 0.5);
+}
+
 export function SlideShow() {
   const [index, setIndex] = useState(0);
+  const [slides, setSlides] = useState(SLIDES);
   const [paused, setPaused] = useState(false);
   const reduce = useReducedMotion();
   const touchStartX = useRef<number | null>(null);
-  const count = SLIDES.length;
+  const count = slides.length;
 
   const goTo = useCallback(
     (i: number) => setIndex(((i % count) + count) % count),
@@ -29,6 +37,10 @@ export function SlideShow() {
   );
   const next = useCallback(() => goTo(index + 1), [goTo, index]);
   const prev = useCallback(() => goTo(index - 1), [goTo, index]);
+
+  useEffect(() => {
+    setSlides(shuffledSlides());
+  }, []);
 
   useEffect(() => {
     if (paused || reduce) return;
@@ -53,12 +65,12 @@ export function SlideShow() {
   return (
     <section className="px-5 pb-8 pt-24 sm:pb-10 md:pt-8">
       <div className="mx-auto w-full max-w-content">
-        <div
+        <div className="relative sm:px-14">
+          <div
           role="region"
           aria-roledescription="carrousel"
           aria-label="Réalisations ProPack"
-          className="relative overflow-hidden rounded-md border border-gold-border bg-noir-800 shadow-card"
-          style={{ aspectRatio: "740 / 244" }}
+          className="relative aspect-[16/7] overflow-hidden rounded-md border border-gold-border bg-noir-800 shadow-card sm:aspect-[740/244]"
           onMouseEnter={() => setPaused(true)}
           onMouseLeave={() => setPaused(false)}
           onFocus={() => setPaused(true)}
@@ -66,7 +78,7 @@ export function SlideShow() {
           onTouchStart={onTouchStart}
           onTouchEnd={onTouchEnd}
         >
-          {SLIDES.map((src, i) => (
+          {slides.map((src, i) => (
             <div
               key={src}
               aria-hidden={i !== index}
@@ -87,12 +99,20 @@ export function SlideShow() {
             </div>
           ))}
 
+          <Image
+            src="/propack-logo.png"
+            alt="Pro Pack Solution"
+            width={88}
+            height={88}
+            className="absolute left-4 top-4 z-10 h-14 w-14 rounded-sm object-cover shadow-md sm:h-[4.5rem] sm:w-[4.5rem]"
+          />
+
           {/* Prev / Next */}
           <button
             type="button"
             onClick={prev}
             aria-label="Visuel précédent"
-            className="absolute left-3 top-1/2 z-10 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-coral text-cream shadow-md transition-[transform,background-color] duration-150 hover:bg-coral-dark active:scale-95 sm:h-11 sm:w-11"
+            className="hidden"
           >
             <span aria-hidden="true">←</span>
           </button>
@@ -100,7 +120,7 @@ export function SlideShow() {
             type="button"
             onClick={next}
             aria-label="Visuel suivant"
-            className="absolute right-3 top-1/2 z-10 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-coral text-cream shadow-md transition-[transform,background-color] duration-150 hover:bg-coral-dark active:scale-95 sm:h-11 sm:w-11"
+            className="hidden"
           >
             <span aria-hidden="true">→</span>
           </button>
@@ -109,19 +129,38 @@ export function SlideShow() {
           <span className="absolute right-3 top-3 z-10 rounded-md bg-cream/85 px-2.5 py-1 font-mono text-[0.65rem] tracking-tech text-noir backdrop-blur-sm">
             {String(index + 1).padStart(2, "0")} / {String(count).padStart(2, "0")}
           </span>
+          </div>
+
+          {/* Prev / Next: inside on phones, outside on larger screens. */}
+          <button
+            type="button"
+            onClick={prev}
+            aria-label="Visuel précédent"
+            className="absolute left-3 top-1/2 z-10 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-md border-2 border-coral bg-cream text-coral shadow-sm transition-[transform,background-color,color] duration-150 hover:bg-coral hover:text-cream active:scale-95 sm:left-0 sm:h-11 sm:w-11"
+          >
+            <span aria-hidden="true">←</span>
+          </button>
+          <button
+            type="button"
+            onClick={next}
+            aria-label="Visuel suivant"
+            className="absolute right-3 top-1/2 z-10 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-md border-2 border-coral bg-cream text-coral shadow-sm transition-[transform,background-color,color] duration-150 hover:bg-coral hover:text-cream active:scale-95 sm:right-0 sm:h-11 sm:w-11"
+          >
+            <span aria-hidden="true">→</span>
+          </button>
         </div>
 
         {/* Dots */}
-        <div className="mt-5 flex flex-wrap justify-center gap-2">
-          {SLIDES.map((src, i) => (
+        <div className="mt-4 flex flex-wrap justify-center gap-1.5 sm:mt-5 sm:gap-2">
+          {slides.map((src, i) => (
             <button
               key={src}
               type="button"
               onClick={() => goTo(i)}
               aria-label={`Aller au visuel ${i + 1}`}
               aria-current={i === index ? "true" : undefined}
-              className={`h-2 rounded-full transition-all duration-300 ${
-                i === index ? "w-6 bg-coral" : "w-2 bg-cream/25 hover:bg-cream/45"
+              className={`h-1.5 rounded-full transition-all duration-300 sm:h-2 ${
+                i === index ? "w-4 bg-coral sm:w-6" : "w-1.5 bg-cream/25 hover:bg-cream/45 sm:w-2"
               }`}
             />
           ))}

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Section } from "@/components/ui/Section";
 import { Card } from "@/components/ui/Card";
 import { Reveal } from "@/components/ui/Reveal";
+import { PageBackground } from "@/components/ui/PageBackground";
 import { EXTRAS } from "@/lib/calculator/constants";
 import { SERVICES, SECTORS } from "@/lib/content";
 import { accentAt } from "@/lib/palette";
@@ -16,41 +17,43 @@ export default function ServicesPage() {
   return (
     <>
       {/* Intro */}
-      <Section
-        eyebrow="Nos services"
-        headingLevel="h1"
-        title={<>Tout pour un packaging <em>d'exception</em></>}
-        intro="De la conception à la production, ProPack couvre l'ensemble de la chaîne de valeur de votre emballage cylindrique."
-      >
-        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-          {SERVICES.map((service, i) => {
-            const accent = accentAt(i);
-            return (
-              <Reveal key={service.title} delay={(i % 3) * 0.08}>
-                <Card interactive className="h-full">
-                  <span
-                    aria-hidden="true"
-                    className="mb-4 grid h-12 w-12 place-items-center rounded-full text-xl"
-                    style={{
-                      color: accent.hex,
-                      backgroundColor: accent.soft,
-                      border: `1px solid ${accent.hex}44`,
-                    }}
-                  >
-                    {service.icon}
-                  </span>
-                  <h3 className="mb-2 font-display text-xl text-cream">
-                    {service.title}
-                  </h3>
-                  <p className="text-sm leading-relaxed text-cream/65">
-                    {service.text}
-                  </p>
-                </Card>
-              </Reveal>
-            );
-          })}
-        </div>
-      </Section>
+      <PageBackground src="/images/services-background-v1.png" position="60% center">
+        <Section
+          eyebrow="Nos services"
+          headingLevel="h1"
+          title={<>Tout pour un packaging <em>d'exception</em></>}
+          intro="De la conception à la production, ProPack couvre l'ensemble de la chaîne de valeur de votre emballage cylindrique."
+        >
+          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+            {SERVICES.map((service, i) => {
+              const accent = accentAt(i);
+              return (
+                <Reveal key={service.title} delay={(i % 3) * 0.08}>
+                  <Card interactive className="h-full">
+                    <span
+                      aria-hidden="true"
+                      className="mb-4 grid h-12 w-12 place-items-center rounded-full text-xl"
+                      style={{
+                        color: accent.hex,
+                        backgroundColor: accent.soft,
+                        border: `1px solid ${accent.hex}44`,
+                      }}
+                    >
+                      {service.icon}
+                    </span>
+                    <h3 className="mb-2 font-display text-xl text-cream">
+                      {service.title}
+                    </h3>
+                    <p className="text-sm leading-relaxed text-cream/65">
+                      {service.text}
+                    </p>
+                  </Card>
+                </Reveal>
+              );
+            })}
+          </div>
+        </Section>
+      </PageBackground>
 
       {/* Finishing options */}
       <Section

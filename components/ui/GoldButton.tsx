@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 
-type Variant = "solid" | "ghost" | "ghostLight";
+type Variant = "solid" | "ghost" | "ghostLight" | "whatsapp";
 type Size = "md" | "lg";
 
 interface CommonProps {
@@ -32,6 +32,9 @@ const variants: Record<Variant, string> = {
   // For dark photo/scrim backgrounds (e.g. the fullscreen hero slider).
   ghostLight:
     "border-2 border-white/70 bg-white/10 text-white backdrop-blur-sm hover:border-white hover:bg-white/20",
+  // WhatsApp's brand green — matches the floating WhatsApp bubble's glyph color.
+  whatsapp:
+    "bg-[#25D366] text-white shadow-[0_3px_12px_-3px_rgba(37,211,102,0.55)] hover:bg-[#20bd5c] hover:shadow-[0_6px_18px_-4px_rgba(37,211,102,0.6)] active:bg-[#1da851]",
 };
 
 function classes(v: Variant, s: Size, block?: boolean, extra = "") {

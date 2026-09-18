@@ -4,6 +4,7 @@ import { Section } from "@/components/ui/Section";
 import { Accordion } from "@/components/ui/Accordion";
 import { ContactForm } from "@/components/contact/ContactForm";
 import { GoldAnchor } from "@/components/ui/GoldButton";
+import { PageBackground } from "@/components/ui/PageBackground";
 import { SITE, FAQ } from "@/lib/content";
 
 export const metadata: Metadata = {
@@ -33,14 +34,15 @@ function ContactIcon({ d }: { d: string }) {
 export default function ContactPage() {
   return (
     <>
-      <Section
-        eyebrow="Contact"
-        headingLevel="h1"
-        title={<>Parlons de <em>votre projet</em></>}
-        intro="Une question, un besoin sur mesure ? Écrivez-nous — nous répondons sous 24 h ouvrées."
-        center={false}
-      >
-        <div className="grid gap-8 lg:grid-cols-[1.4fr_1fr]">
+      <PageBackground src="/images/contact-background-v1.png" position="58% center">
+        <Section
+          eyebrow="Contact"
+          headingLevel="h1"
+          title={<>Parlons de <em>votre projet</em></>}
+          intro="Une question, un besoin sur mesure ? Écrivez-nous, nous répondons sous 24 h ouvrées."
+          center={false}
+        >
+          <div className="grid gap-8 lg:grid-cols-[1.4fr_1fr]">
           {/* Form */}
           <Suspense fallback={<div className="surface min-h-[400px] animate-pulse rounded-2xl" />}>
             <ContactForm />
@@ -77,6 +79,7 @@ export default function ContactPage() {
                   href={`https://wa.me/${SITE.whatsapp}`}
                   target="_blank"
                   rel="noopener noreferrer"
+                  variant="whatsapp"
                   block
                 >
                   WhatsApp direct
@@ -88,23 +91,24 @@ export default function ContactPage() {
             <div className="surface overflow-hidden rounded-2xl">
               <iframe
                 title="Localisation ProPack — Casablanca"
-                src="https://www.openstreetmap.org/export/embed.html?bbox=-7.70%2C33.50%2C-7.46%2C33.66&layer=mapnik&marker=33.605,-7.53"
+                src="https://maps.google.com/maps?q=Zone%20Industrielle%20A%C3%AFn%20Seba%C3%A2%2C%20Casablanca%2C%20Maroc&z=13&output=embed"
                 className="h-56 w-full border-0 grayscale"
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
               />
               <a
-                href="https://www.openstreetmap.org/?mlat=33.605&mlon=-7.53#map=13/33.605/-7.53"
+                href="https://www.google.com/maps/search/?api=1&query=Zone+Industrielle+A%C3%AFn+Seba%C3%A2%2C+Casablanca%2C+Maroc"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="block px-4 py-3 text-center text-xs text-gold hover:text-gold-light"
               >
-                Ouvrir dans OpenStreetMap →
+                Ouvrir dans Google Maps →
               </a>
             </div>
           </aside>
-        </div>
-      </Section>
+          </div>
+        </Section>
+      </PageBackground>
 
       {/* FAQ */}
       <Section eyebrow="FAQ" title={<>Questions <em>fréquentes</em></>}>

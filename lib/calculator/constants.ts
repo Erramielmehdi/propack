@@ -9,7 +9,11 @@ import type { BoxType, Extra, DiamTier } from "./types";
 export const DIAMS = [40, 55, 70, 85, 100, 120, 150, 200, 250, 300, 350] as const;
 
 /** Quick-pick heights (mm). */
-export const QUICK_H = [50, 60, 70, 80, 90, 100, 110, 120, 130] as const;
+export const QUICK_H = [
+  50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200,
+  210, 220, 230, 240, 250, 260, 270, 280, 290, 300, 310, 320, 330, 340, 350,
+  360, 370, 380, 390, 400, 410, 420, 430, 440, 450, 460, 470,
+] as const;
 
 /** Preset quantity options. */
 export const QTY_OPT = [100, 250, 500, 1000, 5000] as const;

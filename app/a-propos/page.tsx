@@ -3,8 +3,9 @@ import Image from "next/image";
 import { Section } from "@/components/ui/Section";
 import { Card } from "@/components/ui/Card";
 import { Reveal } from "@/components/ui/Reveal";
+import { PageBackground } from "@/components/ui/PageBackground";
 import { VALUES, TIMELINE, TEAM, CERTIFICATIONS, SITE } from "@/lib/content";
-import { BOX_STYLES } from "@/lib/gallery";
+import { BOX_STYLES, styleImageSrc } from "@/lib/gallery";
 
 export const metadata: Metadata = {
   title: "À propos",
@@ -16,43 +17,45 @@ export default function AProposPage() {
   return (
     <>
       {/* Histoire + mission */}
-      <Section
-        eyebrow="Notre histoire"
-        headingLevel="h1"
-        title={<>L'artisanat de l'emballage, <em>à la marocaine</em></>}
-        center={false}
-      >
-        <div className="grid gap-8 lg:grid-cols-2">
-          <Reveal>
-            <div className="space-y-4 text-cream/75">
-              <p className="leading-relaxed">
-                Fondée à Casablanca en 2006, {SITE.name} cultive depuis près de
-                vingt ans une conviction simple : un produit d'exception mérite
-                un écrin à sa hauteur. Nous nous sommes spécialisés dans un
-                format exigeant et intemporel, la boîte cylindrique, pour en
-                faire notre signature.
-              </p>
-              <p className="leading-relaxed">
-                Depuis notre atelier d'Aïn Sebaâ, équipé de machines récentes,
-                nous accompagnons les jeunes marques comme les maisons établies,
-                du prototype unique à la série de plusieurs milliers de pièces,
-                avec la même exigence de qualité.
-              </p>
-            </div>
-          </Reveal>
-          <Reveal delay={0.1}>
-            <Card className="h-full">
-              <h2 className="mb-3 font-display text-xl text-cream">Notre mission</h2>
-              <p className="leading-relaxed text-cream/75">
-                Offrir à chaque marque un emballage cylindrique qui raconte son
-                histoire, protège son produit et marque durablement ses clients,
-                en conjuguant savoir-faire local, matériaux responsables et
-                finitions de luxe.
-              </p>
-            </Card>
-          </Reveal>
-        </div>
-      </Section>
+      <PageBackground src="/images/about-background-v1.png" position="58% center">
+        <Section
+          eyebrow="Notre histoire"
+          headingLevel="h1"
+          title={<>L'artisanat de l'emballage, <em>à la marocaine</em></>}
+          center={false}
+        >
+          <div className="grid gap-8 lg:grid-cols-2">
+            <Reveal>
+              <div className="space-y-4 text-cream/75">
+                <p className="leading-relaxed">
+                  Fondée à Casablanca en 2006, {SITE.name} cultive depuis près de
+                  vingt ans une conviction simple : un produit d'exception mérite
+                  un écrin à sa hauteur. Nous nous sommes spécialisés dans un
+                  format exigeant et intemporel, la boîte cylindrique, pour en
+                  faire notre signature.
+                </p>
+                <p className="leading-relaxed">
+                  Depuis notre atelier d'Aïn Sebaâ, équipé de machines récentes,
+                  nous accompagnons les jeunes marques comme les maisons établies,
+                  du prototype unique à la série de plusieurs milliers de pièces,
+                  avec la même exigence de qualité.
+                </p>
+              </div>
+            </Reveal>
+            <Reveal delay={0.1}>
+              <Card className="h-full">
+                <h2 className="mb-3 font-display text-xl text-cream">Notre mission</h2>
+                <p className="leading-relaxed text-cream/75">
+                  Offrir à chaque marque un emballage cylindrique qui raconte son
+                  histoire, protège son produit et marque durablement ses clients,
+                  en conjuguant savoir-faire local, matériaux responsables et
+                  finitions de luxe.
+                </p>
+              </Card>
+            </Reveal>
+          </div>
+        </Section>
+      </PageBackground>
 
       {/* Valeurs */}
       <Section eyebrow="Nos valeurs" title={<>Ce qui nous <em>guide</em></>}>
@@ -129,7 +132,7 @@ export default function AProposPage() {
               <Reveal key={key} delay={(i % 3) * 0.06}>
                 <div className="group relative aspect-[4/3] overflow-hidden rounded-xl border border-gold-border">
                   <Image
-                    src={`/gallery/${style.key}.jpg`}
+                    src={styleImageSrc(style)}
                     alt={`Boîte cylindrique — ${style.label}`}
                     fill
                     sizes="(max-width: 768px) 50vw, 33vw"
@@ -152,10 +155,10 @@ export default function AProposPage() {
 
 /** Six representative styles from the shared photo gallery (lib/gallery.ts). */
 const REALISATIONS = [
-  "blanc-trio",
-  "roses",
-  "matcha",
-  "liege",
-  "tartan",
-  "tubes",
+  "mariage1",
+  "dates1",
+  "sushi1",
+  "publicity4",
+  "sac-luxe3",
+  "cylindre2",
 ] as const;

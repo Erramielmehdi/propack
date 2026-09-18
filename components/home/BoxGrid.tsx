@@ -8,7 +8,58 @@ import { MiniBox } from "@/components/ui/MiniBox";
 import { GoldLink, GoldButton } from "@/components/ui/GoldButton";
 import { BOX_TYPES } from "@/lib/calculator/constants";
 import type { BoxType } from "@/lib/calculator/types";
-import { stylesFor, type BoxStyle } from "@/lib/gallery";
+import { styleImageSrc, stylesFor, type BoxStyle } from "@/lib/gallery";
+
+/** Product photo per box id — each already has its title and description set
+ *  into the artwork, so the card renders the photo alone.
+ *
+ *  These point at pre-sized webp copies under /boxes/card and are rendered
+ *  `unoptimized`: Next's image optimizer mixes up responses when this many
+ *  uncached images are requested at once, and persists the wrong bytes to
+ *  .next/cache/images, so cards render other cards' photos. */
+const HERO_PHOTOS: Record<string, string> = {
+  parfum: "parfum.webp",
+  chocolat: "chocolat.webp",
+  the: "the.webp",
+  bijoux: "bijoux.webp",
+  cosmetique: "cosmetique.webp",
+  cadeau: "cadeau.webp",
+  bougie: "bougie.webp",
+  montre: "montre.webp",
+  fleurs: "fleurs.webp",
+  publicity: "publicity.webp",
+  patisserie: "patisserie.webp",
+  sushi: "sushi.webp",
+  "fruits-secs": "fruits-secs.webp",
+  dates: "dates.webp",
+  "8-mars": "8-mars.webp",
+  mariage: "mariage.webp",
+  "sac-de-luxe": "sac-de-luxe.png",
+  "boite-cylindrique-choix": "boite-cylindrique-choix.png",
+};
+
+/** Catalogue-only entries. Kept out of BOX_TYPES because they aren't priced
+ *  by diameter × height like the cylindrical SKUs. No artwork yet, so these
+ *  render as text cards — drop a webp in /boxes/card and add it to
+ *  HERO_PHOTOS to switch them over to a photo. */
+const EXTRA_CARDS: BoxType[] = [
+  {
+    id: "sac-de-luxe",
+    label: "Sac de luxe",
+    icon: "🛍️",
+    tint: "#C9A227",
+    description:
+      "Sacs papier haut de gamme, personnalisés avec poignées et finitions brillantes ou mates.",
+  },
+  {
+    id: "boite-cylindrique-choix",
+    label: "Boîte cylindrique de choix",
+    icon: "🎁",
+    tint: "#70B8C8",
+    description:
+      "Notre sélection de boîtes cylindriques premium, prêtes à personnaliser.",
+  },
+];
 
 /**
  * Catalogue — full-bleed grid of the 16 box types (illustrated MiniBox cards).
@@ -96,50 +147,49 @@ export function BoxGrid() {
       id="catalogue"
       className="w-full scroll-mt-24 px-5 pb-16 pt-4 sm:px-6 sm:pb-20 sm:pt-6 md:pb-24 lg:px-10"
     >
-      {/* Full-width card grid — horizontal cards: product visual on the left
-          (full-height tinted panel), title + description on the right. */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4">
-        {BOX_TYPES.map((box, i) => (
+      {/* Full-width card grid — each card is its product photo, which carries
+          its own title and copy baked in. Uniform 3:2 to match the source art. */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
+        {[...BOX_TYPES, ...EXTRA_CARDS].map((box, i) => (
           <Reveal key={box.id} delay={(i % 4) * 0.05}>
             <button
               type="button"
               onClick={() => setSelected(box)}
-              className="surface group relative flex h-full w-full items-stretch gap-4 overflow-hidden p-4 text-left transition duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-1 hover:shadow-gold active:scale-[0.99] sm:p-5"
+              className="surface group relative flex aspect-[3/2] w-full overflow-hidden text-left transition duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-1 hover:shadow-gold active:scale-[0.99]"
             >
               <span
-                className="absolute inset-x-0 top-0 h-0.5 origin-left scale-x-0 transition-transform duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:scale-x-100"
+                className="absolute inset-x-0 top-0 z-10 h-0.5 origin-left scale-x-0 transition-transform duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:scale-x-100"
                 style={{ backgroundColor: box.tint }}
                 aria-hidden="true"
               />
-              {/* Left visual — the cylinder itself, no background panel, sized
-                  to fill most of the card height like a tall product photo. */}
-              <span
-                className="flex w-16 shrink-0 items-center justify-center self-stretch sm:w-20"
-                aria-hidden="true"
-              >
-                <MiniBox
-                  tint={box.tint}
-                  size={78}
-                  className="h-full max-h-[184px] w-auto transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:-translate-y-0.5 group-hover:scale-105"
+              {HERO_PHOTOS[box.id] ? (
+                <Image
+                  src={`/boxes/card/${HERO_PHOTOS[box.id]}`}
+                  alt={box.label}
+                  fill
+                  unoptimized
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  className="object-cover transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:scale-105"
                 />
-              </span>
-              {/* Right text column — vertically centered and nudged right:
-                  bold enlarged title centered above a regular-weight
-                  description. */}
-              <span className="flex min-w-0 flex-1 flex-col justify-center gap-1 py-0.5 pl-2 sm:pl-3">
-                <span className="text-left font-display text-3xl font-bold leading-tight text-cream sm:text-4xl">
-                  {box.label}
+              ) : (
+                /* No artwork yet — mirror the photos' layout (visual left,
+                   title + copy right) so the card sits in the same rhythm. */
+                <span className="flex w-full items-center gap-5 px-6 sm:px-8">
+                  <MiniBox
+                    tint={box.tint}
+                    size={64}
+                    className="shrink-0 transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:-translate-y-0.5 group-hover:scale-105"
+                  />
+                  <span className="flex min-w-0 flex-1 flex-col gap-2">
+                    <span className="font-display text-2xl font-bold leading-tight text-cream sm:text-3xl">
+                      {box.label}
+                    </span>
+                    <span className="text-sm leading-snug text-cream/65">
+                      {box.description}
+                    </span>
+                  </span>
                 </span>
-                <span className="text-xs font-normal leading-snug text-cream/65 sm:text-sm">
-                  {box.description}
-                </span>
-                <span
-                  className="pt-1 font-mono text-[0.62rem] uppercase tracking-tech opacity-0 transition-opacity duration-200 group-hover:opacity-100"
-                  style={{ color: box.tint }}
-                >
-                  Voir les styles →
-                </span>
-              </span>
+              )}
             </button>
           </Reveal>
         ))}
@@ -229,9 +279,10 @@ export function BoxGrid() {
                             className="group/st relative aspect-[4/3] overflow-hidden border border-gold-border transition duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-0.5 hover:border-gold hover:shadow-gold active:scale-[0.98]"
                           >
                             <Image
-                              src={`/gallery/${s.key}.jpg`}
+                              src={styleImageSrc(s)}
                               alt={s.label}
                               fill
+                              unoptimized
                               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 300px"
                               className="object-cover transition-transform duration-300 group-hover/st:scale-105"
                             />
@@ -270,35 +321,22 @@ export function BoxGrid() {
                         </h3>
                       </div>
 
-                      {/* Photo in a Moroccan arch frame — horseshoe arch, terracotta
-                          band + brass keyline, with a zellige 8-pointed star at the crown. */}
-                      <figure className="relative mx-auto mt-6 w-full max-w-md">
-                        {/* Rub el Hizb (8-pointed star) medallion at the apex */}
-                        <span
-                          aria-hidden="true"
-                          className="absolute left-1/2 top-1 z-10 h-4 w-4 -translate-x-1/2"
-                        >
-                          <span className="absolute inset-0 bg-[#E4C06A] shadow-sm" />
-                          <span className="absolute inset-0 rotate-45 bg-[#E4C06A] shadow-sm" />
-                        </span>
-                        {/* Terracotta arch band */}
+                      {/* Clean presentation frame for the selected product. */}
+                      <figure className="relative mx-auto mt-6 w-full max-w-2xl overflow-hidden border border-gold-border bg-cream p-3 shadow-card sm:p-5">
                         <div
-                          className="relative bg-gradient-to-b from-[#B0502F] to-[#8A3D22] p-2.5 shadow-[0_14px_36px_-12px_rgba(138,61,34,0.6)]"
-                          style={{ borderRadius: "48% 48% 14px 14px / 40% 40% 14px 14px" }}
+                          className="relative border border-gold-border bg-white p-2 shadow-card sm:p-3"
                         >
-                          {/* Brass keyline */}
                           <div
-                            className="border-[3px] border-[#E4C06A]/80 bg-[#8A3D22] p-[3px]"
-                            style={{ borderRadius: "46% 46% 10px 10px / 38% 38% 10px 10px" }}
+                            className="border border-gold-border bg-cream p-2"
                           >
                             <div
-                              className="relative aspect-square overflow-hidden bg-white"
-                              style={{ borderRadius: "45% 45% 8px 8px / 37% 37% 8px 8px" }}
+                              className="relative aspect-[4/3] overflow-hidden rounded-sm bg-white"
                             >
                               <Image
-                                src={`/gallery/${style.key}.jpg`}
+                                src={styleImageSrc(style)}
                                 alt={style.label}
                                 fill
+                                unoptimized
                                 sizes="(max-width: 640px) 90vw, 448px"
                                 className="object-cover"
                                 priority

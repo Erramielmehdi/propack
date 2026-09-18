@@ -11,14 +11,20 @@ interface Props {
   onSelect: (box: BoxType) => void;
   client: ClientInfo;
   onClient: (patch: Partial<ClientInfo>) => void;
+  locked?: boolean;
 }
 
 /** Step 1 — box type grid + client info. */
-export function StepType({ boxType, onSelect, client, onClient }: Props) {
+export function StepType({ boxType, onSelect, client, onClient, locked = false }: Props) {
   return (
     <div className="flex flex-col gap-10">
       <fieldset>
         <legend className={`${calcLabel} mb-4`}>Choisissez un type de boîte</legend>
+        {locked && (
+          <p className="mb-4 text-sm text-[#C9A22799]">
+            Le produit choisi depuis le catalogue est verrouille pour ce devis.
+          </p>
+        )}
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
           {BOX_TYPES.map((box) => {
             const selected = boxType?.id === box.id;
@@ -27,8 +33,9 @@ export function StepType({ boxType, onSelect, client, onClient }: Props) {
                 key={box.id}
                 type="button"
                 aria-pressed={selected}
+                disabled={locked}
                 onClick={() => onSelect(box)}
-                className={`flex flex-col items-center gap-1.5 p-4 text-center ${calcOption(selected)}`}
+                className={`${calcOption(selected)} flex flex-col items-center gap-1.5 p-4 text-center ${locked ? "cursor-not-allowed opacity-70" : ""}`}
               >
                 <MiniBox tint={box.tint} size={36} />
                 <span className="font-display text-sm text-[#E8D5A3]">
@@ -51,13 +58,6 @@ export function StepType({ boxType, onSelect, client, onClient }: Props) {
             type="date"
             value={client.date}
             onChange={(e) => onClient({ date: e.target.value })}
-          />
-          <CalcInput
-            id="client-code"
-            label="Code / Référence"
-            placeholder="REF-2026-001"
-            value={client.code}
-            onChange={(e) => onClient({ code: e.target.value })}
           />
           <CalcInput
             id="client-name"

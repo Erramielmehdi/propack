@@ -41,6 +41,10 @@ export function Calculator() {
 
   const [state, setState] = useState<WizardState>(initialState);
   const [save, setSave] = useState<SaveState>({ status: "idle" });
+  const catalogTypeId = searchParams.get("type");
+  const productLocked = Boolean(
+    catalogTypeId && BOX_TYPES.some((box) => box.id === catalogTypeId),
+  );
 
   // Prefill from query params: ?type= (home grid) and ?d=&h=&q= (live estimator).
   // Never clobbers values the user has already chosen in this session.
@@ -214,6 +218,7 @@ export function Calculator() {
                 onSelect={(box) => setState((s) => ({ ...s, boxType: box }))}
                 client={state.client}
                 onClient={patchClient}
+                locked={productLocked}
               />
             )}
             {state.step === 1 && (

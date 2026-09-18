@@ -6,7 +6,6 @@ import { Header } from "@/components/layout/Header";
 import { SiteMenu } from "@/components/layout/SiteMenu";
 import { Footer } from "@/components/layout/Footer";
 import { WhatsAppFloat } from "@/components/layout/WhatsAppFloat";
-import GridBackground from "@/components/ui/demo";
 import { SITE } from "@/lib/content";
 
 const playfair = Cormorant_Garamond({
@@ -74,7 +73,6 @@ export default function RootLayout({
       className={`${playfair.variable} ${lato.variable} ${plexMono.variable}`}
     >
       <body className="flex min-h-screen flex-col">
-        <GridBackground />
         <a
           href="#main"
           className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-coral focus:px-4 focus:py-2 focus:text-cream"
