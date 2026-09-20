@@ -1,8 +1,9 @@
 "use client";
 
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { CheckCircle2 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { BOX_TYPES } from "@/lib/calculator/constants";
 import { calc } from "@/lib/calculator/price";
 import { buildDevisPayload } from "@/lib/calculator/payload";
@@ -41,6 +42,7 @@ export function Calculator() {
 
   const [state, setState] = useState<WizardState>(initialState);
   const [save, setSave] = useState<SaveState>({ status: "idle" });
+  const saveLocked = useRef(false);
   const catalogTypeId = searchParams.get("type");
   const productLocked = Boolean(
     catalogTypeId && BOX_TYPES.some((box) => box.id === catalogTypeId),
@@ -111,12 +113,14 @@ export function Calculator() {
   const reset = () => {
     setState(initialState());
     setSave({ status: "idle" });
+    saveLocked.current = false;
   };
 
   // ---- Result actions -------------------------------------------------------
 
   const saveDevis = async () => {
-    if (!result || !state.boxType) return;
+    if (!result || !state.boxType || saveLocked.current) return;
+    saveLocked.current = true;
     setSave({ status: "saving" });
     const payload = buildDevisPayload({
       boxType: state.boxType,
@@ -137,6 +141,7 @@ export function Calculator() {
       const data = await res.json();
       setSave({ status: "saved", id: data.devis?.id ?? "—" });
     } catch (err) {
+      saveLocked.current = false;
       setSave({
         status: "error",
         message:
@@ -263,12 +268,15 @@ export function Calculator() {
             <button
               type="button"
               onClick={saveDevis}
-              disabled={save.status === "saving"}
+              disabled={save.status === "saving" || save.status === "saved"}
               className={`${calcBtn.gold} w-full sm:flex-1`}
             >
+              {save.status === "saved" && <CheckCircle2 className="h-4 w-4" />}
               {save.status === "saving"
                 ? "Enregistrement…"
-                : "Enregistrer le devis"}
+                : save.status === "saved"
+                  ? "Devis enregistré"
+                  : "Enregistrer le devis"}
             </button>
             <button
               type="button"
@@ -287,13 +295,25 @@ export function Calculator() {
             </a>
           </div>
           {save.status === "saved" && (
-            <p
-              className="text-center text-sm"
-              style={{ color: calcColor.green }}
+            <div
+              className="flex items-start gap-3 border border-[#25D36666] bg-[#25D36612] p-4"
               role="status"
+              aria-live="polite"
             >
-              Devis enregistré ✓ Référence : {save.id}
-            </p>
+              <CheckCircle2
+                className="mt-0.5 h-5 w-5 shrink-0"
+                style={{ color: calcColor.green }}
+                aria-hidden="true"
+              />
+              <div>
+                <p className="text-sm font-semibold" style={{ color: calcColor.green }}>
+                  Votre devis a bien été enregistré.
+                </p>
+                <p className="mt-1 text-xs" style={{ color: calcColor.text2 }}>
+                  Référence : <span className="font-mono text-[#E8D5A3]">{save.id}</span>
+                </p>
+              </div>
+            </div>
           )}
           {save.status === "error" && (
             <p
