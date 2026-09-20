@@ -26,10 +26,10 @@ export function StepHeight({ height, onSelect }: Props) {
                 type="button"
                 aria-pressed={selected}
                 onClick={() => onSelect(h)}
-                className={`rounded-md border px-3 py-2.5 text-sm font-semibold transition-[transform,background-color,border-color,box-shadow,color] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D65C44]/30 focus-visible:ring-offset-2 active:scale-[0.97] ${
+                className={`rounded-md border px-3 py-2.5 text-sm font-semibold transition-[transform,background-color,border-color,box-shadow,color] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E8C547]/35 active:scale-[0.97] ${
                   selected
-                    ? "border-[#D65C44] bg-[#FFF1ED] text-[#B5432E] shadow-[0_10px_24px_-18px_rgba(214,92,68,0.7)]"
-                    : "border-[#241F1A24] bg-white text-[#403832] hover:border-[#241F1A55]"
+                    ? "border-[#C9A227] bg-[#C9A22718] text-[#E8C547] shadow-[0_10px_24px_-18px_rgba(201,162,39,0.75)]"
+                    : "border-[#C9A22733] bg-white/[0.02] text-[#E8D5A3] hover:border-[#C9A22799]"
                 }`}
               >
                 {h} mm

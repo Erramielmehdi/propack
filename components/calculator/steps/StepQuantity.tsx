@@ -38,7 +38,7 @@ export function StepQuantity({
           <button
             type="button"
             onClick={() => setCustom((v) => !v)}
-            className="font-mono text-[0.68rem] font-semibold uppercase tracking-tech text-[#D65C44] transition-colors hover:text-[#B5432E]"
+            className="font-mono text-[0.68rem] font-semibold uppercase tracking-tech text-[#C9A227] transition-colors hover:text-[#E8C547]"
           >
             {custom ? "Choisir un palier" : "Quantité personnalisée"}
           </button>
@@ -57,12 +57,12 @@ export function StepQuantity({
                   onClick={() => onQuantity(q)}
                   className={`flex flex-col items-center gap-1 px-4 py-5 ${calcOption(selected)}`}
                 >
-                  <span className="font-display text-2xl font-semibold text-[#241F1A]">
+                  <span className="font-display text-2xl font-semibold text-[#E8D5A3]">
                     {q === 5000 ? "5 000+" : fmtInt(q)}
                   </span>
                   <span
                     className={`text-xs font-semibold ${
-                      disc > 0 ? "text-[#D65C44]" : "text-[#756A63]"
+                      disc > 0 ? "text-[#C9A227]" : "text-[#C9A22799]"
                     }`}
                   >
                     {disc > 0 ? `−${fmtPct(disc)}` : "Prix plein"}
@@ -104,22 +104,22 @@ export function StepQuantity({
             return (
               <label
                 key={extra.key}
-                className={`flex cursor-pointer items-center justify-between gap-3 px-4 py-3.5 focus-within:ring-2 focus-within:ring-[#D65C44]/30 focus-within:ring-offset-2 ${calcOption(checked)}`}
+                className={`flex cursor-pointer items-center justify-between gap-3 px-4 py-3.5 focus-within:ring-2 focus-within:ring-[#E8C547]/35 ${calcOption(checked)}`}
               >
                 <span className="flex items-center gap-3">
                   <span
                     aria-hidden="true"
                     className={`grid h-5 w-5 place-items-center rounded border text-xs ${
                       checked
-                        ? "border-[#D65C44] bg-[#D65C44] text-white"
-                        : "border-[#241F1A3D] bg-white text-transparent"
+                        ? "border-[#C9A227] bg-[#C9A227] text-[#0A0A0A]"
+                        : "border-[#C9A22744] bg-white/[0.02] text-transparent"
                     }`}
                   >
                     ✓
                   </span>
-                  <span className="text-sm font-medium text-[#241F1A]">{extra.label}</span>
+                  <span className="text-sm font-medium text-[#E8D5A3]">{extra.label}</span>
                 </span>
-                <span className="text-sm font-semibold text-[#D65C44]">
+                <span className="text-sm font-semibold text-[#C9A227]">
                   +{fmtDH(extra.price)}
                 </span>
                 <input

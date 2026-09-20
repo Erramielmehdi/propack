@@ -40,33 +40,33 @@ export function StepResult({ result, diameter, height, quantity, extras }: Props
   return (
     <div className="flex flex-col gap-8">
       {/* Unit price hero */}
-      <div className="rounded-lg border border-[#241F1A] bg-[#241F1A] p-8 text-center shadow-[0_20px_44px_-30px_rgba(36,31,26,0.8)]">
-        <p className="mb-2 font-mono text-[0.66rem] font-semibold uppercase tracking-tech text-[#F3B2A5]">
+      <div className="rounded-lg border border-[#C9A22744] bg-white/[0.025] p-8 text-center shadow-[0_20px_44px_-30px_rgba(0,0,0,0.9)]">
+        <p className="mb-2 font-mono text-[0.66rem] font-semibold uppercase tracking-tech text-[#C9A227]">
           Prix unitaire net
         </p>
-        <p className="font-display text-5xl font-bold text-white sm:text-6xl">
+        <p className="font-display text-5xl font-bold text-[#E8C547] sm:text-6xl">
           {fmtDH(result.unitDisc)}
         </p>
-        <p className="mt-3 text-sm text-white/65">
+        <p className="mt-3 text-sm text-[#C9A22799]">
           Boîte Ø {diameter} mm × {height} mm
           {extras.length > 0 && <> · {extras.map((e) => e.label).join(", ")}</>}
         </p>
       </div>
 
       {/* Breakdown */}
-      <div className="overflow-hidden rounded-lg border border-[#241F1A24] bg-white">
-        <h3 className={`${calcLabel} border-b border-[#241F1A1F] bg-[#F8F7F5] px-6 py-4`}>
+      <div className="overflow-hidden rounded-lg border border-[#C9A22733] bg-white/[0.02]">
+        <h3 className={`${calcLabel} border-b border-[#C9A22733] bg-[#C9A2270A] px-6 py-4`}>
           Détail du calcul
         </h3>
         <dl>
           {rows.map((row) => (
             <div
               key={row.label}
-              className="flex items-center justify-between gap-4 border-b border-[#241F1A14] px-6 py-3.5 last:border-0"
+              className="flex items-center justify-between gap-4 border-b border-[#C9A22722] px-6 py-3.5 last:border-0"
             >
               <dt
                 className={`text-sm ${
-                  row.strong ? "font-semibold text-[#241F1A]" : "text-[#6F645D]"
+                  row.strong ? "font-semibold text-[#E8D5A3]" : "text-[#C9A22799]"
                 }`}
               >
                 {row.label}
@@ -74,10 +74,10 @@ export function StepResult({ result, diameter, height, quantity, extras }: Props
               <dd
                 className={`font-mono tabular-nums text-sm ${
                   row.accent
-                    ? "font-semibold text-[#D65C44]"
+                    ? "font-semibold text-[#E8C547]"
                     : row.strong
-                      ? "font-semibold text-[#241F1A]"
-                      : "text-[#514842]"
+                      ? "font-semibold text-[#E8D5A3]"
+                      : "text-[#E8D5A3CC]"
                 }`}
               >
                 {row.value}
@@ -88,7 +88,7 @@ export function StepResult({ result, diameter, height, quantity, extras }: Props
       </div>
 
       {/* Grand total */}
-      <div className="rounded-lg border border-[#D65C44] bg-[#F0806A] px-8 py-7 text-[#241F1A] shadow-[0_16px_36px_-24px_rgba(214,92,68,0.75)]">
+      <div className="rounded-lg border border-[#E8C547] bg-[linear-gradient(135deg,#C9A227_0%,#E8C547_50%,#C9A227_100%)] px-8 py-7 text-[#0A0A0A] shadow-[0_16px_36px_-24px_rgba(201,162,39,0.8)]">
         <div className="flex flex-col items-center justify-between gap-2 sm:flex-row">
           <span className="font-mono text-sm font-medium uppercase tracking-tech">
             Total estimé
@@ -99,7 +99,7 @@ export function StepResult({ result, diameter, height, quantity, extras }: Props
         </div>
       </div>
 
-      <p className="text-center text-xs leading-relaxed text-[#756A63]">
+      <p className="text-center text-xs leading-relaxed text-[#C9A22799]">
         Estimation indicative hors taxes. Un devis ferme vous sera confirmé après
         étude de votre projet.
       </p>
