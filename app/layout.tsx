@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import { Cormorant_Garamond, Archivo, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 import "./staggered-menu.css";
-import { Header } from "@/components/layout/Header";
-import { SiteMenu } from "@/components/layout/SiteMenu";
+import { SiteNavigation } from "@/components/layout/SiteNavigation";
 import { Footer } from "@/components/layout/Footer";
 import { WhatsAppFloat } from "@/components/layout/WhatsAppFloat";
 import { SITE } from "@/lib/content";
@@ -79,9 +78,7 @@ export default function RootLayout({
         >
           Aller au contenu
         </a>
-        {/* Desktop: classic sticky header. Phone: staggered burger menu. */}
-        <Header />
-        <SiteMenu />
+        <SiteNavigation />
         <main id="main" className="flex-1">
           {children}
         </main>
