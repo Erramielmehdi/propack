@@ -1,61 +1,71 @@
 import type { DevisPayload, DevisRecord } from "./calculator/types";
+import { createSupabaseAdminClient } from "./supabase/admin";
 
-/**
- * In-memory devis store (stub).
- *
- * Persisted on `globalThis` so it survives Next.js hot-reloads in dev.
- * Swap this module for a SQLite/Postgres adapter in production — the public
- * API (list/get/create/update/remove) stays the same.
- */
+const TABLE = "devis";
 
-interface Store {
-  devis: DevisRecord[];
-  seq: number;
+function fail(operation: string, message: string): never {
+  throw new Error(`Supabase ${operation} failed: ${message}`);
 }
 
-const g = globalThis as unknown as { __propackStore?: Store };
+export async function listDevis(): Promise<DevisRecord[]> {
+  const { data, error } = await createSupabaseAdminClient()
+    .from(TABLE)
+    .select("*")
+    .order("created_at", { ascending: false });
 
-const store: Store =
-  g.__propackStore ?? (g.__propackStore = { devis: [], seq: 0 });
-
-function nextId(): string {
-  store.seq += 1;
-  return `DV-${String(store.seq).padStart(5, "0")}`;
+  if (error) fail("listDevis", error.message);
+  return (data ?? []) as DevisRecord[];
 }
 
-export function listDevis(): DevisRecord[] {
-  return [...store.devis].reverse(); // newest first
+export async function getDevis(id: string): Promise<DevisRecord | undefined> {
+  const { data, error } = await createSupabaseAdminClient()
+    .from(TABLE)
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (error) fail("getDevis", error.message);
+  return (data as DevisRecord | null) ?? undefined;
 }
 
-export function getDevis(id: string): DevisRecord | undefined {
-  return store.devis.find((d) => d.id === id);
+export async function createDevis(
+  payload: DevisPayload,
+): Promise<DevisRecord> {
+  const { data, error } = await createSupabaseAdminClient()
+    .from(TABLE)
+    .insert({
+      ...payload,
+      status: "nouveau",
+    })
+    .select("*")
+    .single();
+
+  if (error) fail("createDevis", error.message);
+  return data as DevisRecord;
 }
 
-export function createDevis(payload: DevisPayload): DevisRecord {
-  const record: DevisRecord = {
-    ...payload,
-    id: nextId(),
-    // Timestamp is provided by the caller-agnostic Date at request time.
-    created_at: new Date().toISOString(),
-    status: payload.status || "nouveau",
-  };
-  store.devis.push(record);
-  return record;
-}
-
-export function updateDevis(
+export async function updateDevis(
   id: string,
   patch: Partial<DevisPayload>,
-): DevisRecord | undefined {
-  const record = store.devis.find((d) => d.id === id);
-  if (!record) return undefined;
-  Object.assign(record, patch);
-  return record;
+): Promise<DevisRecord | undefined> {
+  const { data, error } = await createSupabaseAdminClient()
+    .from(TABLE)
+    .update(patch)
+    .eq("id", id)
+    .select("*")
+    .maybeSingle();
+
+  if (error) fail("updateDevis", error.message);
+  return (data as DevisRecord | null) ?? undefined;
 }
 
-export function removeDevis(id: string): boolean {
-  const i = store.devis.findIndex((d) => d.id === id);
-  if (i === -1) return false;
-  store.devis.splice(i, 1);
-  return true;
+export async function removeDevis(id: string): Promise<boolean> {
+  const { data, error } = await createSupabaseAdminClient()
+    .from(TABLE)
+    .delete()
+    .eq("id", id)
+    .select("id");
+
+  if (error) fail("removeDevis", error.message);
+  return Boolean(data?.length);
 }

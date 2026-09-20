@@ -1,13 +1,27 @@
 import { NextResponse } from "next/server";
+import { getAdminUser } from "@/lib/admin-auth";
 import { createDevis, listDevis } from "@/lib/store";
 import { validateDevisPayload } from "@/lib/calculator/payload";
 
-/** GET /api/devis — list all saved quotes (newest first). */
+export const dynamic = "force-dynamic";
+
+/** GET /api/devis - list all saved quotes for authenticated admins. */
 export async function GET() {
-  return NextResponse.json({ devis: listDevis() });
+  if (!(await getAdminUser())) {
+    return NextResponse.json({ error: "Non autorisé." }, { status: 401 });
+  }
+
+  try {
+    return NextResponse.json({ devis: await listDevis() });
+  } catch {
+    return NextResponse.json(
+      { error: "Impossible de charger les devis." },
+      { status: 503 },
+    );
+  }
 }
 
-/** POST /api/devis — persist a new quote. */
+/** POST /api/devis - persist a validated customer quote. */
 export async function POST(req: Request) {
   let body: unknown;
   try {
@@ -21,9 +35,19 @@ export async function POST(req: Request) {
 
   const { ok, errors, value } = validateDevisPayload(body);
   if (!ok || !value) {
-    return NextResponse.json({ error: "Validation échouée.", errors }, { status: 422 });
+    return NextResponse.json(
+      { error: "Validation échouée.", errors },
+      { status: 422 },
+    );
   }
 
-  const devis = createDevis(value);
-  return NextResponse.json({ devis }, { status: 201 });
+  try {
+    const devis = await createDevis(value);
+    return NextResponse.json({ devis }, { status: 201 });
+  } catch {
+    return NextResponse.json(
+      { error: "Impossible d'enregistrer le devis." },
+      { status: 503 },
+    );
+  }
 }
