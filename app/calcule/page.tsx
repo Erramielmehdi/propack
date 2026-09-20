@@ -8,30 +8,25 @@ export const metadata: Metadata = {
     "Estimez le prix de votre boîte cadeau cylindrique sur mesure en quelques clics : type, diamètre, hauteur, quantité et finitions.",
 };
 
-/**
- * Full-black page background — a deliberate departure from the site's light
- * "Dieline" theme, scoped to this page only (the shared <Section> stays
- * untouched so every other route keeps its white background).
- */
 export default function CalculePage() {
   return (
     <section
-      className="w-full px-5 pb-16 pt-28 sm:pb-20 sm:pt-28 md:pb-24 md:pt-24"
-      style={{
-        background:
-          "linear-gradient(135deg, #0A0A0A 0%, #1A1208 50%, #0A0A0A 100%)",
-      }}
+      className="relative w-full overflow-hidden bg-[#F5F6F4] px-5 pb-16 pt-28 sm:pb-20 sm:pt-28 md:pb-24 md:pt-24"
     >
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-[#241F1A1A]"
+      />
       <div className="mx-auto w-full max-w-content">
-        <div className="mb-10 flex flex-col items-start text-left md:mb-14">
-          <span className="mb-5 inline-flex items-center gap-2 rounded-full border border-[#C9A22733] bg-[#C9A22718] px-4 py-1.5 font-mono text-[0.7rem] font-medium uppercase tracking-tech text-[#C9A227]">
+        <div className="mb-10 max-w-3xl border-l-2 border-[#D65C44] pl-5 text-left md:mb-12 md:pl-7">
+          <span className="mb-4 block font-mono text-[0.68rem] font-semibold uppercase tracking-tech text-[#D65C44]">
             Devis instantané
           </span>
-          <h1 className="text-balance font-display text-3xl font-bold leading-[1.12] text-[#E8D5A3] sm:text-4xl md:text-[2.7rem]">
+          <h1 className="text-balance font-display text-3xl font-bold leading-[1.12] text-[#241F1A] sm:text-4xl md:text-[2.7rem]">
             Calculez le prix de{" "}
-            <em className="not-italic text-[#E8C547]">votre boîte</em>
+            <em className="not-italic text-[#D65C44]">votre boîte</em>
           </h1>
-          <p className="mt-5 max-w-2xl text-base leading-relaxed text-[#C9A22799]">
+          <p className="mt-4 max-w-2xl text-base leading-relaxed text-[#665D57]">
             Renseignez les caractéristiques de votre boîte cylindrique et
             obtenez une estimation immédiate, options de finition et remises
             volume comprises.
@@ -49,11 +44,11 @@ export default function CalculePage() {
 function CalculatorFallback() {
   return (
     <div className="mx-auto w-full max-w-4xl">
-      <div className="min-h-[360px] animate-pulse rounded-2xl border border-[#C9A22733] bg-[#ffffff08] p-8">
-        <div className="mb-4 h-6 w-40 rounded bg-[#ffffff12]" />
+      <div className="min-h-[360px] animate-pulse rounded-lg border border-[#241F1A24] bg-white p-8 shadow-card">
+        <div className="mb-4 h-6 w-40 rounded bg-[#241F1A12]" />
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="h-20 rounded-lg bg-[#ffffff12]" />
+            <div key={i} className="h-20 rounded-lg bg-[#241F1A0D]" />
           ))}
         </div>
       </div>

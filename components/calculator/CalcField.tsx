@@ -1,8 +1,7 @@
 import type { InputHTMLAttributes, ReactNode, TextareaHTMLAttributes } from "react";
 
-/** Dark-themed field styling, mirroring components/ui/Input.tsx's shape. */
 const fieldBase =
-  "w-full rounded-lg border border-[#C9A22744] bg-white/[0.03] px-4 py-3 text-sm text-[#E8D5A3] placeholder:text-[#C9A22755] outline-none transition-colors focus:border-[#C9A227] focus-visible:ring-2 focus-visible:ring-[#E8C547]/40";
+  "w-full rounded-md border border-[#241F1A2E] bg-[#FCFBFA] px-4 py-3 text-sm text-[#241F1A] placeholder:text-[#877B73] outline-none transition-[border-color,background-color,box-shadow] focus:border-[#D65C44] focus:bg-white focus-visible:ring-2 focus-visible:ring-[#D65C44]/20";
 
 interface FieldWrapProps {
   id: string;
@@ -16,12 +15,12 @@ function FieldWrap({ id, label, hint, children }: FieldWrapProps) {
     <div className="flex flex-col gap-1.5">
       <label
         htmlFor={id}
-        className="font-mono text-[0.65rem] font-medium uppercase tracking-tech text-[#C9A22799]"
+        className="font-mono text-[0.65rem] font-semibold uppercase tracking-tech text-[#6F645D]"
       >
         {label}
       </label>
       {children}
-      {hint && <span className="text-xs text-[#C9A22799]">{hint}</span>}
+      {hint && <span className="text-xs leading-relaxed text-[#756A63]">{hint}</span>}
     </div>
   );
 }

@@ -21,8 +21,8 @@ export function StepType({ boxType, onSelect, client, onClient, locked = false }
       <fieldset>
         <legend className={`${calcLabel} mb-4`}>Choisissez un type de boîte</legend>
         {locked && (
-          <p className="mb-4 text-sm text-[#C9A22799]">
-            Le produit choisi depuis le catalogue est verrouille pour ce devis.
+          <p className="mb-4 rounded-md border border-[#D65C4433] bg-[#FFF5F2] px-4 py-3 text-sm text-[#665D57]">
+            Le produit choisi depuis le catalogue est verrouillé pour ce devis.
           </p>
         )}
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
@@ -38,7 +38,7 @@ export function StepType({ boxType, onSelect, client, onClient, locked = false }
                 className={`${calcOption(selected)} flex flex-col items-center gap-1.5 p-4 text-center ${locked ? "cursor-not-allowed opacity-70" : ""}`}
               >
                 <MiniBox tint={box.tint} size={36} />
-                <span className="font-display text-sm text-[#E8D5A3]">
+                <span className="font-sans text-sm font-semibold text-[#241F1A]">
                   {box.label}
                 </span>
               </button>

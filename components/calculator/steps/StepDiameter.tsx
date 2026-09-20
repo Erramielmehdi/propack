@@ -16,7 +16,7 @@ export function StepDiameter({ diameter, onSelect }: Props) {
     <div>
       <div className="mb-5 flex flex-wrap items-center gap-4">
         <span className={calcLabel}>Sélectionnez un diamètre (mm)</span>
-        <div className="flex flex-wrap gap-3 text-xs text-[#C9A22799]">
+        <div className="flex flex-wrap gap-3 text-xs text-[#756A63]">
           {(["s", "m", "l"] as const).map((t) => (
             <span key={t} className="inline-flex items-center gap-1.5">
               <span
@@ -30,7 +30,7 @@ export function StepDiameter({ diameter, onSelect }: Props) {
       </div>
 
       {diameter != null && !(DIAMS as readonly number[]).includes(diameter) && (
-        <p className="mb-4 rounded-lg border border-[#C9A22733] bg-[#C9A22712] px-4 py-2.5 font-mono text-xs text-[#C9A227]">
+        <p className="mb-4 rounded-md border border-[#D65C4433] bg-[#FFF5F2] px-4 py-2.5 font-mono text-xs text-[#B5432E]">
           Sélection actuelle : Ø {diameter} mm (personnalisé) — choisissez un
           diamètre standard ci-dessous pour la remplacer.
         </p>
@@ -50,14 +50,14 @@ export function StepDiameter({ diameter, onSelect }: Props) {
               className={`flex items-center justify-between border-l-4 px-4 py-4 text-left ${calcOption(selected)}`}
             >
               <span>
-                <span className="block font-display text-xl text-[#E8D5A3]">
-                  {d} <span className="text-sm text-[#C9A22799]">mm</span>
+                <span className="block font-display text-xl font-semibold text-[#241F1A]">
+                  {d} <span className="font-sans text-xs font-normal text-[#756A63]">mm</span>
                 </span>
-                <span className="text-xs text-[#C9A22799]">
+                <span className="text-xs text-[#756A63]">
                   Taux {fmt2(getDiamRate(d))} DH/cm²
                 </span>
               </span>
-              {selected && <span className="text-[#E8C547]">✓</span>}
+              {selected && <span className="font-semibold text-[#D65C44]">✓</span>}
             </button>
           );
         })}

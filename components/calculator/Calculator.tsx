@@ -192,16 +192,16 @@ export function Calculator() {
   return (
     <div className="mx-auto w-full max-w-5xl">
       <div
-        className={`${calcCard} p-5 shadow-[0_20px_60px_-24px_rgba(0,0,0,0.65)] sm:p-8 md:p-10`}
+        className={`${calcCard} p-5 sm:p-8 md:p-10`}
       >
-      <div className="mb-8">
+      <div className="mb-8 border-b border-[#241F1A14] pb-7">
         <StepDots
           steps={STEP_LABELS as unknown as string[]}
           current={state.step}
           onJump={jumpTo}
         />
         <p
-          className="mt-4 text-center font-display text-2xl"
+          className="mt-5 text-center font-display text-2xl font-semibold"
           style={{ color: calcColor.text }}
         >
           {STEP_LABELS[state.step]}
@@ -263,7 +263,7 @@ export function Calculator() {
 
       {/* Result-only action bar */}
       {isLast && result && (
-        <div className="mt-8 flex flex-col gap-3 border-t border-[#C9A22722] pt-8">
+        <div className="mt-8 flex flex-col gap-3 border-t border-[#241F1A14] pt-8">
           <div className="flex flex-col gap-3 sm:flex-row">
             <button
               type="button"
@@ -296,7 +296,7 @@ export function Calculator() {
           </div>
           {save.status === "saved" && (
             <div
-              className="flex items-start gap-3 border border-[#25D36666] bg-[#25D36612] p-4"
+              className="flex items-start gap-3 rounded-md border border-[#1E7A554D] bg-[#F0F8F4] p-4"
               role="status"
               aria-live="polite"
             >
@@ -310,7 +310,7 @@ export function Calculator() {
                   Votre devis a bien été enregistré.
                 </p>
                 <p className="mt-1 text-xs" style={{ color: calcColor.text2 }}>
-                  Référence : <span className="font-mono text-[#E8D5A3]">{save.id}</span>
+                  Référence : <span className="font-mono font-semibold text-[#241F1A]">{save.id}</span>
                 </p>
               </div>
             </div>
@@ -330,7 +330,7 @@ export function Calculator() {
       {/* Wizard navigation — Précédent/Suivant share the row (flexing to fit
           narrow screens); Réinitialiser sits below as a quiet text action so
           the row never outgrows the card on mobile. */}
-      <div className="mt-8 border-t border-[#C9A22722] pt-6">
+      <div className="mt-8 border-t border-[#241F1A14] pt-6">
         <div className="flex items-center justify-between gap-3">
           <button
             type="button"
@@ -356,7 +356,7 @@ export function Calculator() {
         <button
           type="button"
           onClick={reset}
-          className="mx-auto mt-4 block font-mono text-xs uppercase tracking-tech text-[#C9A22799] transition-colors hover:text-[#E8C547]"
+          className="mx-auto mt-4 block font-mono text-[0.68rem] font-semibold uppercase tracking-tech text-[#756A63] transition-colors hover:text-[#D65C44]"
         >
           Réinitialiser
         </button>
