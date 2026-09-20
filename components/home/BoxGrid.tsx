@@ -8,6 +8,7 @@ import { MiniBox } from "@/components/ui/MiniBox";
 import { GoldLink, GoldButton } from "@/components/ui/GoldButton";
 import { BOX_TYPES } from "@/lib/calculator/constants";
 import type { BoxType } from "@/lib/calculator/types";
+import { CUSTOM_QUOTE_TYPES, isCustomQuoteType } from "@/lib/catalog";
 import { styleImageSrc, stylesFor, type BoxStyle } from "@/lib/gallery";
 
 /** Product photo per box id — each already has its title and description set
@@ -37,29 +38,6 @@ const HERO_PHOTOS: Record<string, string> = {
   "sac-de-luxe": "sac-de-luxe.png",
   "boite-cylindrique-choix": "boite-cylindrique-choix.png",
 };
-
-/** Catalogue-only entries. Kept out of BOX_TYPES because they aren't priced
- *  by diameter × height like the cylindrical SKUs. No artwork yet, so these
- *  render as text cards — drop a webp in /boxes/card and add it to
- *  HERO_PHOTOS to switch them over to a photo. */
-const EXTRA_CARDS: BoxType[] = [
-  {
-    id: "sac-de-luxe",
-    label: "Sac de luxe",
-    icon: "🛍️",
-    tint: "#C9A227",
-    description:
-      "Sacs papier haut de gamme, personnalisés avec poignées et finitions brillantes ou mates.",
-  },
-  {
-    id: "boite-cylindrique-choix",
-    label: "Boîte cylindrique de choix",
-    icon: "🎁",
-    tint: "#70B8C8",
-    description:
-      "Notre sélection de boîtes cylindriques premium, prêtes à personnaliser.",
-  },
-];
 
 /**
  * Catalogue — full-bleed grid of the 16 box types (illustrated MiniBox cards).
@@ -150,7 +128,7 @@ export function BoxGrid() {
       {/* Full-width card grid — each card is its product photo, which carries
           its own title and copy baked in. Uniform 3:2 to match the source art. */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
-        {[...BOX_TYPES, ...EXTRA_CARDS].map((box, i) => (
+        {[...BOX_TYPES, ...CUSTOM_QUOTE_TYPES].map((box, i) => (
           <Reveal key={box.id} delay={(i % 4) * 0.05}>
             <button
               type="button"
@@ -309,8 +287,16 @@ export function BoxGrid() {
                         <GoldButton variant="ghost" onClick={() => setStyle(null)}>
                           ← Retour
                         </GoldButton>
-                        <GoldLink href={`/calcule?type=${selected.id}`}>
-                          Calculer mon prix →
+                        <GoldLink
+                          href={
+                            isCustomQuoteType(selected.id)
+                              ? `/configurer?type=${selected.id}&style=${style.key}`
+                              : `/calcule?type=${selected.id}`
+                          }
+                        >
+                          {isCustomQuoteType(selected.id)
+                            ? "Demander un devis →"
+                            : "Calculer mon prix →"}
                         </GoldLink>
                       </div>
 

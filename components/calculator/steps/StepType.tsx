@@ -11,11 +11,25 @@ interface Props {
   onSelect: (box: BoxType) => void;
   client: ClientInfo;
   onClient: (patch: Partial<ClientInfo>) => void;
+  errors?: ClientFieldErrors;
   locked?: boolean;
 }
 
+export interface ClientFieldErrors {
+  name?: string;
+  phone?: string;
+  email?: string;
+}
+
 /** Step 1 — box type grid + client info. */
-export function StepType({ boxType, onSelect, client, onClient, locked = false }: Props) {
+export function StepType({
+  boxType,
+  onSelect,
+  client,
+  onClient,
+  errors = {},
+  locked = false,
+}: Props) {
   return (
     <div className="flex flex-col gap-10">
       <fieldset>
@@ -49,42 +63,47 @@ export function StepType({ boxType, onSelect, client, onClient, locked = false }
 
       <fieldset>
         <legend className={`${calcLabel} mb-4`}>
-          Vos informations (optionnel)
+          Vos coordonnées
         </legend>
+        <p className="mb-4 text-sm leading-relaxed text-[#C9A22799]">
+          Pour confirmer votre devis, indiquez votre nom et au moins un moyen
+          de contact.
+        </p>
         <div className="grid gap-4 sm:grid-cols-2">
-          <CalcInput
-            id="client-date"
-            label="Date"
-            type="date"
-            value={client.date}
-            onChange={(e) => onClient({ date: e.target.value })}
-          />
           <CalcInput
             id="client-name"
             label="Nom / Société"
+            required
+            autoComplete="name"
             placeholder="Votre nom ou société"
             value={client.name}
+            error={errors.name}
             onChange={(e) => onClient({ name: e.target.value })}
           />
           <CalcInput
             id="client-phone"
             label="Téléphone"
             type="tel"
+            autoComplete="tel"
             placeholder="+212 6 00 00 00 00"
             value={client.phone}
+            error={errors.phone}
             onChange={(e) => onClient({ phone: e.target.value })}
           />
           <CalcInput
             id="client-email"
             label="E-mail"
             type="email"
+            autoComplete="email"
             placeholder="vous@exemple.com"
             value={client.email}
+            error={errors.email}
             onChange={(e) => onClient({ email: e.target.value })}
           />
           <CalcInput
             id="client-address"
-            label="Adresse"
+            label="Ville / Adresse (optionnel)"
+            autoComplete="street-address"
             placeholder="Ville, Maroc"
             value={client.address}
             onChange={(e) => onClient({ address: e.target.value })}

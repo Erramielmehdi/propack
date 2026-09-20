@@ -11,7 +11,7 @@ import type { ClientInfo } from "@/lib/calculator/types";
 import { SITE } from "@/lib/content";
 import { StepDots } from "@/components/ui/StepDots";
 import { calcBtn, calcCard, calcColor } from "./theme";
-import { StepType } from "./steps/StepType";
+import { StepType, type ClientFieldErrors } from "./steps/StepType";
 import { StepDiameter } from "./steps/StepDiameter";
 import { StepHeight } from "./steps/StepHeight";
 import { StepQuantity } from "./steps/StepQuantity";
@@ -29,6 +29,8 @@ import {
 /** sessionStorage key used to hand a quote off to /contact. */
 export const CONTACT_HANDOFF_KEY = "propack:contact-prefill";
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 type SaveState =
   | { status: "idle" }
   | { status: "saving" }
@@ -42,11 +44,14 @@ export function Calculator() {
 
   const [state, setState] = useState<WizardState>(initialState);
   const [save, setSave] = useState<SaveState>({ status: "idle" });
+  const [clientErrors, setClientErrors] = useState<ClientFieldErrors>({});
   const saveLocked = useRef(false);
   const catalogTypeId = searchParams.get("type");
-  const productLocked = Boolean(
-    catalogTypeId && BOX_TYPES.some((box) => box.id === catalogTypeId),
+  const catalogBox = useMemo(
+    () => BOX_TYPES.find((box) => box.id === catalogTypeId) ?? null,
+    [catalogTypeId],
   );
+  const productLocked = catalogBox !== null;
 
   // Prefill from query params: ?type= (home grid) and ?d=&h=&q= (live estimator).
   // Never clobbers values the user has already chosen in this session.
@@ -58,16 +63,15 @@ export function Calculator() {
     if (!typeId && !(d > 0) && !(h > 0) && !(q > 0)) return;
 
     setState((s) => {
-      const box = typeId ? BOX_TYPES.find((b) => b.id === typeId) : undefined;
       return {
         ...s,
-        boxType: s.boxType ?? box ?? null,
+        boxType: s.boxType ?? catalogBox,
         diameter: s.diameter ?? (d > 0 ? d : null),
         height: s.height ?? (h > 0 ? h : null),
         quantity: s.quantity ?? (q > 0 ? q : null),
       };
     });
-  }, [searchParams]);
+  }, [catalogBox, searchParams]);
 
   const extras = useMemo(() => resolveExtras(state.extraKeys), [state.extraKeys]);
 
@@ -85,8 +89,15 @@ export function Calculator() {
 
   // ---- State mutators -------------------------------------------------------
 
-  const patchClient = (patch: Partial<ClientInfo>) =>
+  const patchClient = (patch: Partial<ClientInfo>) => {
     setState((s) => ({ ...s, client: { ...s.client, ...patch } }));
+    setClientErrors((current) => ({
+      ...current,
+      ...(patch.name !== undefined ? { name: undefined } : {}),
+      ...(patch.phone !== undefined ? { phone: undefined } : {}),
+      ...(patch.email !== undefined ? { email: undefined, phone: undefined } : {}),
+    }));
+  };
 
   const toggleExtra = (key: string) =>
     setState((s) => ({
@@ -101,18 +112,22 @@ export function Calculator() {
     setState((s) => ({ ...s, step: Math.min(s.step + 1, STEP_LABELS.length - 1) }));
   };
 
-  const goPrev = () =>
+  const goPrev = () => {
+    if (save.status === "saved") return;
     setState((s) => ({ ...s, step: Math.max(s.step - 1, 0) }));
+  };
 
   const jumpTo = (i: number) => {
+    if (save.status === "saved") return;
     if (i <= state.step || canReach(state, i)) {
       setState((s) => ({ ...s, step: i }));
     }
   };
 
   const reset = () => {
-    setState(initialState());
+    setState({ ...initialState(), boxType: catalogBox });
     setSave({ status: "idle" });
+    setClientErrors({});
     saveLocked.current = false;
   };
 
@@ -120,6 +135,29 @@ export function Calculator() {
 
   const saveDevis = async () => {
     if (!result || !state.boxType || saveLocked.current) return;
+
+    const errors: ClientFieldErrors = {};
+    if (!state.client.name.trim()) errors.name = "Indiquez votre nom ou votre société.";
+    if (!state.client.phone.trim() && !state.client.email.trim()) {
+      errors.phone = "Ajoutez un téléphone ou un e-mail pour être recontacté.";
+    }
+    if (state.client.email.trim() && !EMAIL_RE.test(state.client.email.trim())) {
+      errors.email = "Saisissez une adresse e-mail valide.";
+    }
+    if (Object.keys(errors).length > 0) {
+      setClientErrors(errors);
+      setState((current) => ({ ...current, step: 0 }));
+      window.setTimeout(() => {
+        const targetId = errors.name
+          ? "client-name"
+          : errors.email
+            ? "client-email"
+            : "client-phone";
+        document.getElementById(targetId)?.focus();
+      }, 350);
+      return;
+    }
+
     saveLocked.current = true;
     setSave({ status: "saving" });
     const payload = buildDevisPayload({
@@ -137,15 +175,16 @@ export function Calculator() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
       setSave({ status: "saved", id: data.devis?.id ?? "—" });
     } catch (err) {
       saveLocked.current = false;
       setSave({
         status: "error",
-        message:
-          "Impossible d'enregistrer le devis pour le moment. Réessayez ou contactez-nous.",
+        message: err instanceof Error && !err.message.startsWith("HTTP")
+          ? err.message
+          : "Impossible de confirmer le devis pour le moment. Réessayez ou contactez-nous.",
       });
     }
   };
@@ -165,7 +204,7 @@ export function Calculator() {
     return `https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent(msg)}`;
   }, [result, state, extras]);
 
-  const sendByEmail = () => {
+  const continueRequest = () => {
     if (!result || !state.boxType) return;
     const payload = buildDevisPayload({
       boxType: state.boxType,
@@ -198,7 +237,7 @@ export function Calculator() {
         <StepDots
           steps={STEP_LABELS as unknown as string[]}
           current={state.step}
-          onJump={jumpTo}
+          onJump={save.status === "saved" ? undefined : jumpTo}
         />
         <p
           className="mt-5 text-center font-display text-2xl font-semibold"
@@ -223,6 +262,7 @@ export function Calculator() {
                 onSelect={(box) => setState((s) => ({ ...s, boxType: box }))}
                 client={state.client}
                 onClient={patchClient}
+                errors={clientErrors}
                 locked={productLocked}
               />
             )}
@@ -255,6 +295,7 @@ export function Calculator() {
                 height={state.height!}
                 quantity={state.quantity!}
                 extras={extras}
+                boxTypeLabel={state.boxType?.label ?? ""}
               />
             )}
           </motion.div>
@@ -280,10 +321,10 @@ export function Calculator() {
             </button>
             <button
               type="button"
-              onClick={sendByEmail}
+              onClick={continueRequest}
               className={`${calcBtn.ghost} w-full sm:flex-1`}
             >
-              Envoyer ce devis par e-mail
+              Compléter ma demande
             </button>
             <a
               href={waHref}
@@ -291,7 +332,7 @@ export function Calculator() {
               rel="noopener noreferrer"
               className={`${calcBtn.wa} w-full sm:flex-1`}
             >
-              Partager sur WhatsApp
+              Envoyer via WhatsApp
             </a>
           </div>
           {save.status === "saved" && (
@@ -307,7 +348,7 @@ export function Calculator() {
               />
               <div>
                 <p className="text-sm font-semibold" style={{ color: calcColor.green }}>
-                  Votre devis a bien été enregistré.
+                  Votre devis est enregistré et transmis à ProPack.
                 </p>
                 <p className="mt-1 text-xs" style={{ color: calcColor.text2 }}>
                   Référence : <span className="font-mono font-semibold text-[#E8D5A3]">{save.id}</span>
@@ -335,7 +376,7 @@ export function Calculator() {
           <button
             type="button"
             onClick={goPrev}
-            disabled={state.step === 0}
+            disabled={state.step === 0 || save.status === "saved"}
             className={`${calcBtn.ghost} flex-1 sm:flex-none`}
           >
             ← Précédent
@@ -358,7 +399,7 @@ export function Calculator() {
           onClick={reset}
           className="mx-auto mt-4 block font-mono text-[0.68rem] font-semibold uppercase tracking-tech text-[#C9A22799] transition-colors hover:text-[#E8C547]"
         >
-          Réinitialiser
+          {save.status === "saved" ? "Créer un nouveau devis" : "Réinitialiser"}
         </button>
       </div>
       </div>

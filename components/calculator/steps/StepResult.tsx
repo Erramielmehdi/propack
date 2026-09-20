@@ -1,7 +1,7 @@
 "use client";
 
 import type { CalcResult, Extra } from "@/lib/calculator/types";
-import { fmt2, fmtDH, fmtInt, fmtPct } from "@/lib/format";
+import { fmtDH, fmtInt, fmtPct } from "@/lib/format";
 import { calcLabel } from "../theme";
 
 interface Props {
@@ -10,6 +10,7 @@ interface Props {
   height: number;
   quantity: number;
   extras: Extra[];
+  boxTypeLabel: string;
 }
 
 interface Row {
@@ -20,21 +21,34 @@ interface Row {
 }
 
 /** Step 5 — unit price hero + breakdown + grand total. */
-export function StepResult({ result, diameter, height, quantity, extras }: Props) {
+export function StepResult({
+  result,
+  diameter,
+  height,
+  quantity,
+  extras,
+  boxTypeLabel,
+}: Props) {
   const rows: Row[] = [
-    { label: `Surface latérale (π × D × H)`, value: `${fmt2(result.bodyArea)} cm²` },
-    { label: `Couvercle + fond (2 × π × r²)`, value: `${fmt2(result.lidArea)} cm²` },
-    { label: "Surface totale", value: `${fmt2(result.totalArea)} cm²`, strong: true },
-    { label: `Taux diamètre (${diameter} mm)`, value: `${fmt2(result.dRate)} DH/cm²` },
-    { label: "Coût des options", value: fmtDH(result.extraCost) },
-    { label: "Prix unitaire brut", value: fmtDH(result.unitPrice), strong: true },
+    { label: "Type de boîte", value: boxTypeLabel, strong: true },
+    { label: "Dimensions", value: `Ø ${diameter} × ${height} mm` },
+    { label: "Quantité", value: `${fmtInt(quantity)} pièces` },
+    {
+      label: "Options sélectionnées",
+      value: extras.length > 0 ? extras.map((extra) => extra.label).join(", ") : "Aucune",
+    },
+    { label: "Prix unitaire estimé", value: fmtDH(result.unitPrice), strong: true },
     {
       label: "Remise volume",
       value: result.disc > 0 ? `− ${fmtPct(result.disc)}` : "—",
       accent: result.disc > 0,
     },
-    { label: "Prix unitaire net", value: fmtDH(result.unitDisc), strong: true, accent: true },
-    { label: "Quantité", value: `× ${fmtInt(quantity)}` },
+    {
+      label: "Prix unitaire après remise",
+      value: fmtDH(result.unitDisc),
+      strong: true,
+      accent: true,
+    },
   ];
 
   return (

@@ -8,7 +8,8 @@ import { Section } from "@/components/ui/Section";
 import { GoldButton, GoldLink } from "@/components/ui/GoldButton";
 import { Input, Textarea } from "@/components/ui/Input";
 import { BOX_TYPES, QTY_OPT } from "@/lib/calculator/constants";
-import { BOX_STYLES, styleImageSrc, stylesFor } from "@/lib/gallery";
+import { CUSTOM_QUOTE_TYPES } from "@/lib/catalog";
+import { styleImageSrc, stylesFor } from "@/lib/gallery";
 import { fmtInt } from "@/lib/format";
 import { accentAt } from "@/lib/palette";
 
@@ -36,11 +37,13 @@ type Status =
  */
 export function ConfigurerClient() {
   const sp = useSearchParams();
-  const box = BOX_TYPES.find((b) => b.id === sp.get("type"));
+  const box = [...BOX_TYPES, ...CUSTOM_QUOTE_TYPES].find(
+    (item) => item.id === sp.get("type"),
+  );
   const styleParam = sp.get("style");
+  const availableStyles = box ? stylesFor(box.id) : [];
   const style =
-    (styleParam ? BOX_STYLES[styleParam] : undefined) ??
-    (box ? stylesFor(box.id)[0] : undefined);
+    availableStyles.find((item) => item.key === styleParam) ?? availableStyles[0];
 
   const [form, setForm] = useState<FormState>(() => ({
     name: "",
