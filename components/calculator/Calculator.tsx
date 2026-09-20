@@ -2,8 +2,8 @@
 
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { CheckCircle2 } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { BOX_TYPES } from "@/lib/calculator/constants";
 import { calc } from "@/lib/calculator/price";
 import { buildDevisPayload } from "@/lib/calculator/payload";
@@ -17,6 +17,7 @@ import { StepHeight } from "./steps/StepHeight";
 import { StepQuantity } from "./steps/StepQuantity";
 import { StepResult } from "./steps/StepResult";
 import { buildWaMessage } from "./waMessage";
+import { EmailQuoteDialog } from "./EmailQuoteDialog";
 import {
   STEP_LABELS,
   canGo,
@@ -38,12 +39,12 @@ type SaveState =
   | { status: "error"; message: string };
 
 export function Calculator() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const reduce = useReducedMotion();
 
   const [state, setState] = useState<WizardState>(initialState);
   const [save, setSave] = useState<SaveState>({ status: "idle" });
+  const [emailDialogOpen, setEmailDialogOpen] = useState(false);
   const [clientErrors, setClientErrors] = useState<ClientFieldErrors>({});
   const saveLocked = useRef(false);
   const catalogTypeId = searchParams.get("type");
@@ -127,21 +128,22 @@ export function Calculator() {
   const reset = () => {
     setState({ ...initialState(), boxType: catalogBox });
     setSave({ status: "idle" });
+    setEmailDialogOpen(false);
     setClientErrors({});
     saveLocked.current = false;
   };
 
   // ---- Result actions -------------------------------------------------------
 
-  const saveDevis = async () => {
-    if (!result || !state.boxType || saveLocked.current) return;
+  const saveDevis = async (client = state.client): Promise<boolean> => {
+    if (!result || !state.boxType || saveLocked.current) return false;
 
     const errors: ClientFieldErrors = {};
-    if (!state.client.name.trim()) errors.name = "Indiquez votre nom ou votre société.";
-    if (!state.client.phone.trim() && !state.client.email.trim()) {
+    if (!client.name.trim()) errors.name = "Indiquez votre nom ou votre société.";
+    if (!client.phone.trim() && !client.email.trim()) {
       errors.phone = "Ajoutez un téléphone ou un e-mail pour être recontacté.";
     }
-    if (state.client.email.trim() && !EMAIL_RE.test(state.client.email.trim())) {
+    if (client.email.trim() && !EMAIL_RE.test(client.email.trim())) {
       errors.email = "Saisissez une adresse e-mail valide.";
     }
     if (Object.keys(errors).length > 0) {
@@ -155,7 +157,7 @@ export function Calculator() {
             : "client-phone";
         document.getElementById(targetId)?.focus();
       }, 350);
-      return;
+      return false;
     }
 
     saveLocked.current = true;
@@ -166,7 +168,7 @@ export function Calculator() {
       height: state.height!,
       quantity: state.quantity!,
       extras,
-      client: state.client,
+      client,
       notes: state.notes,
     });
     try {
@@ -178,6 +180,7 @@ export function Calculator() {
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
       setSave({ status: "saved", id: data.devis?.id ?? "—" });
+      return true;
     } catch (err) {
       saveLocked.current = false;
       setSave({
@@ -186,6 +189,7 @@ export function Calculator() {
           ? err.message
           : "Impossible de confirmer le devis pour le moment. Réessayez ou contactez-nous.",
       });
+      return false;
     }
   };
 
@@ -204,23 +208,18 @@ export function Calculator() {
     return `https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent(msg)}`;
   }, [result, state, extras]);
 
-  const continueRequest = () => {
-    if (!result || !state.boxType) return;
-    const payload = buildDevisPayload({
-      boxType: state.boxType,
-      diameter: state.diameter!,
-      height: state.height!,
-      quantity: state.quantity!,
-      extras,
-      client: state.client,
-      notes: state.notes,
-    });
-    try {
-      sessionStorage.setItem(CONTACT_HANDOFF_KEY, JSON.stringify(payload));
-    } catch {
-      /* storage may be unavailable; contact form still works empty */
-    }
-    router.push("/contact?from=calculateur");
+  const openEmailDialog = () => {
+    if (save.status === "error") setSave({ status: "idle" });
+    setEmailDialogOpen(true);
+  };
+
+  const closeEmailDialog = useCallback(() => setEmailDialogOpen(false), []);
+
+  const submitEmailRequest = async (contact: { name: string; email: string }) => {
+    const client = { ...state.client, ...contact };
+    setState((current) => ({ ...current, client }));
+    setClientErrors({});
+    await saveDevis(client);
   };
 
   // ---- Render ---------------------------------------------------------------
@@ -308,7 +307,7 @@ export function Calculator() {
           <div className="flex flex-col gap-3 sm:flex-row">
             <button
               type="button"
-              onClick={saveDevis}
+              onClick={() => void saveDevis()}
               disabled={save.status === "saving" || save.status === "saved"}
               className={`${calcBtn.gold} w-full sm:flex-1`}
             >
@@ -321,10 +320,11 @@ export function Calculator() {
             </button>
             <button
               type="button"
-              onClick={continueRequest}
+              onClick={openEmailDialog}
+              disabled={save.status === "saving" || save.status === "saved"}
               className={`${calcBtn.ghost} w-full sm:flex-1`}
             >
-              Compléter ma demande
+              {save.status === "saved" ? "Demande envoyée" : "Recevoir par e-mail"}
             </button>
             <a
               href={waHref}
@@ -403,6 +403,18 @@ export function Calculator() {
         </button>
       </div>
       </div>
+
+      <EmailQuoteDialog
+        open={emailDialogOpen}
+        initialName={state.client.name}
+        initialEmail={state.client.email}
+        productLabel={state.boxType?.label ?? ""}
+        dimensions={`Ø ${state.diameter ?? "—"} × ${state.height ?? "—"} mm`}
+        total={result?.total ?? 0}
+        status={save}
+        onClose={closeEmailDialog}
+        onSubmit={submitEmailRequest}
+      />
     </div>
   );
 }
