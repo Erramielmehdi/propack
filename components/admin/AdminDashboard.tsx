@@ -1,5 +1,6 @@
 "use client";
 
+import { LogOut, Mail, Phone, RefreshCw, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { DevisRecord } from "@/lib/calculator/types";
@@ -96,29 +97,61 @@ export function AdminDashboard({ adminEmail }: { adminEmail: string }) {
 
   return (
     <div>
-      <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="font-display text-3xl text-cream">Tableau de bord</h1>
-          <p className="mt-1 text-xs text-cream/55">{adminEmail}</p>
+      <div className="mb-6 flex items-start justify-between gap-4 sm:mb-8 sm:items-center">
+        <div className="min-w-0">
+          <p className="label-track mb-1 text-cream/50">Administration</p>
+          <h1 className="font-display text-3xl leading-none text-cream sm:text-4xl">
+            Tableau de bord
+          </h1>
+          <p className="mt-2 break-all text-xs text-cream/55">{adminEmail}</p>
         </div>
-        <button
-          type="button"
-          onClick={logout}
-          className="self-start font-mono text-xs uppercase tracking-tech text-cream/60 transition-colors hover:text-gold"
-        >
-          Déconnexion
-        </button>
+        <div className="flex shrink-0 gap-2">
+          <button
+            type="button"
+            onClick={() => void load()}
+            disabled={loading}
+            aria-label="Actualiser les devis"
+            title="Actualiser"
+            className="grid h-11 w-11 place-items-center rounded-md border border-gold-border text-cream/65 transition-colors hover:border-gold hover:text-gold disabled:opacity-40"
+          >
+            <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+          </button>
+          <button
+            type="button"
+            onClick={logout}
+            aria-label="Se déconnecter"
+            title="Déconnexion"
+            className="grid h-11 w-11 place-items-center rounded-md border border-gold-border text-cream/65 transition-colors hover:border-gold hover:text-gold"
+          >
+            <LogOut className="h-4 w-4" />
+          </button>
+        </div>
       </div>
 
-      <div className="mb-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div className="mb-7 grid grid-cols-2 gap-2 sm:mb-8 sm:gap-4 lg:grid-cols-4">
         <StatTile label="Devis" value={fmtInt(stats.count)} />
         <StatTile label="Chiffre estimé" value={fmtDH(stats.revenue)} />
         <StatTile label="Unités" value={fmtInt(stats.units)} />
         <StatTile label="Panier moyen" value={fmtDH(stats.average)} />
       </div>
 
-      {loading && <p className="text-cream/60">Chargement…</p>}
-      {error && <p className="mb-4 text-error">{error}</p>}
+      {loading && devis.length === 0 && (
+        <div className="surface p-6 text-center text-sm text-cream/60" role="status">
+          Chargement…
+        </div>
+      )}
+      {error && (
+        <div className="mb-4 flex items-center justify-between gap-3 rounded-md border border-error/40 bg-error/10 p-4">
+          <p className="text-sm text-error">{error}</p>
+          <button
+            type="button"
+            onClick={() => void load()}
+            className="shrink-0 text-xs font-semibold text-error underline underline-offset-4"
+          >
+            Réessayer
+          </button>
+        </div>
+      )}
 
       {!loading && !error && devis.length === 0 && (
         <p className="surface p-8 text-center text-cream/55">
@@ -127,7 +160,28 @@ export function AdminDashboard({ adminEmail }: { adminEmail: string }) {
       )}
 
       {devis.length > 0 && (
-        <div className="surface overflow-x-auto">
+        <section aria-labelledby="quotes-heading">
+          <div className="mb-3 flex items-end justify-between gap-3">
+            <h2 id="quotes-heading" className="font-display text-2xl text-cream">
+              Demandes récentes
+            </h2>
+            <span className="font-mono text-[0.65rem] uppercase tracking-tech text-gold/70">
+              {fmtInt(devis.length)} devis
+            </span>
+          </div>
+
+          <div className="space-y-3 md:hidden">
+            {devis.map((item) => (
+              <MobileQuoteCard
+                key={item.id}
+                item={item}
+                onStatus={setStatus}
+                onRemove={remove}
+              />
+            ))}
+          </div>
+
+          <div className="surface hidden overflow-x-auto md:block">
           <table className="w-full min-w-[900px] text-left text-sm">
             <thead>
               <tr className="border-b border-gold-border text-cream/60">
@@ -164,6 +218,15 @@ export function AdminDashboard({ adminEmail }: { adminEmail: string }) {
                         {item.client_phone}
                       </a>
                     )}
+                    {item.client_email && (
+                      <a
+                        href={`mailto:${item.client_email}`}
+                        className="block max-w-40 truncate text-xs hover:text-gold"
+                        title={item.client_email}
+                      >
+                        {item.client_email}
+                      </a>
+                    )}
                   </td>
                   <td className="px-4 py-3">
                     <select
@@ -192,10 +255,122 @@ export function AdminDashboard({ adminEmail }: { adminEmail: string }) {
               ))}
             </tbody>
           </table>
-        </div>
+          </div>
+        </section>
       )}
     </div>
   );
+}
+
+function MobileQuoteCard({
+  item,
+  onStatus,
+  onRemove,
+}: {
+  item: DevisRecord;
+  onStatus: (id: string, status: string) => Promise<void>;
+  onRemove: (id: string) => Promise<void>;
+}) {
+  return (
+    <article className="surface overflow-hidden rounded-lg">
+      <div className="flex items-start justify-between gap-3 border-b border-gold-border/50 p-4">
+        <div className="min-w-0">
+          <p className="truncate font-mono text-xs font-semibold text-gold" title={item.id}>
+            {item.id}
+          </p>
+          <p className="mt-1 text-xs text-cream/45">{formatDate(item.created_at)}</p>
+        </div>
+        <div className="shrink-0 text-right">
+          <p className="text-[0.65rem] uppercase text-cream/45">Total HT</p>
+          <p className="font-display text-xl font-semibold text-gold-light">
+            {fmtDH(item.total_price)}
+          </p>
+        </div>
+      </div>
+
+      <dl className="grid grid-cols-2 gap-x-4 gap-y-3 p-4 text-sm">
+        <QuoteDetail label="Produit" value={item.product_type} />
+        <QuoteDetail label="Dimensions" value={`Ø ${item.diameter_mm} × ${item.height_mm} mm`} />
+        <QuoteDetail label="Quantité" value={fmtInt(item.quantity)} />
+        <QuoteDetail
+          label="Remise"
+          value={item.discount_pct > 0 ? fmtPct(item.discount_pct) : "—"}
+        />
+      </dl>
+
+      <div className="border-t border-gold-border/40 px-4 py-3">
+        <p className="text-[0.65rem] uppercase text-cream/45">Client</p>
+        <p className="mt-1 font-semibold text-cream">{item.client_name || "Non renseigné"}</p>
+        <div className="mt-2 flex flex-wrap gap-2">
+          {item.client_phone && (
+            <a
+              href={`tel:${item.client_phone}`}
+              className="inline-flex min-h-10 items-center gap-2 rounded-md border border-gold-border px-3 py-2 text-xs text-cream/75"
+            >
+              <Phone className="h-3.5 w-3.5 text-gold" />
+              {item.client_phone}
+            </a>
+          )}
+          {item.client_email && (
+            <a
+              href={`mailto:${item.client_email}`}
+              className="inline-flex min-h-10 min-w-0 items-center gap-2 rounded-md border border-gold-border px-3 py-2 text-xs text-cream/75"
+            >
+              <Mail className="h-3.5 w-3.5 shrink-0 text-gold" />
+              <span className="break-all">{item.client_email}</span>
+            </a>
+          )}
+        </div>
+      </div>
+
+      <div className="flex items-end gap-3 border-t border-gold-border/40 p-4">
+        <label className="min-w-0 flex-1">
+          <span className="mb-1.5 block font-mono text-[0.62rem] uppercase tracking-tech text-gold/70">
+            Statut
+          </span>
+          <select
+            value={item.status}
+            onChange={(event) => void onStatus(item.id, event.target.value)}
+            className="h-11 w-full rounded-md border border-gold-border bg-noir-800 px-3 text-sm text-cream outline-none focus:border-gold focus-visible:ring-2 focus-visible:ring-gold/30"
+            aria-label={`Statut du devis ${item.id}`}
+          >
+            {STATUSES.map((status) => (
+              <option key={status} value={status}>
+                {status}
+              </option>
+            ))}
+          </select>
+        </label>
+        <button
+          type="button"
+          onClick={() => void onRemove(item.id)}
+          className="grid h-11 w-11 shrink-0 place-items-center rounded-md border border-error/40 text-error transition-colors hover:bg-error/10"
+          aria-label={`Supprimer le devis ${item.id}`}
+          title="Supprimer"
+        >
+          <Trash2 className="h-4 w-4" />
+        </button>
+      </div>
+    </article>
+  );
+}
+
+function QuoteDetail({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="min-w-0">
+      <dt className="text-[0.65rem] uppercase text-cream/45">{label}</dt>
+      <dd className="mt-0.5 break-words text-cream/80">{value}</dd>
+    </div>
+  );
+}
+
+function formatDate(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "Date inconnue";
+  return new Intl.DateTimeFormat("fr-MA", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(date);
 }
 
 function TableHead({
@@ -218,9 +393,13 @@ function TableHead({
 
 function StatTile({ label, value }: { label: string; value: string }) {
   return (
-    <div className="surface p-5">
-      <div className="label-track text-cream/55">{label}</div>
-      <div className="mt-1 font-display text-2xl text-gold-light">{value}</div>
+    <div className="surface min-w-0 p-3 sm:p-5">
+      <div className="min-h-8 font-mono text-[0.58rem] font-medium uppercase leading-4 tracking-tech text-cream/55 sm:min-h-0 sm:text-[0.7rem]">
+        {label}
+      </div>
+      <div className="mt-1 break-words font-display text-lg leading-tight text-gold-light sm:text-2xl">
+        {value}
+      </div>
     </div>
   );
 }

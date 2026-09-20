@@ -9,7 +9,7 @@ export default async function AdminLoginPage() {
   if (await getAdminUser()) redirect("/admin");
 
   return (
-    <section className="w-full px-5 pb-16 pt-28 sm:px-6 md:pt-24 lg:px-10">
+    <section className="w-full">
       <AdminLogin configured={isAdminConfigured()} />
     </section>
   );

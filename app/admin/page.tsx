@@ -9,10 +9,8 @@ export default async function AdminPage() {
   if (!user) redirect("/admin/login");
 
   return (
-    <section className="w-full px-5 pb-16 pt-28 sm:px-6 md:pt-24 lg:px-10">
-      <div className="mx-auto w-full max-w-content">
-        <AdminDashboard adminEmail={user.email ?? ""} />
-      </div>
+    <section className="w-full">
+      <AdminDashboard adminEmail={user.email ?? ""} />
     </section>
   );
 }

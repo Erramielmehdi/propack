@@ -7,10 +7,8 @@ export const metadata: Metadata = {
 };
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
-  // pt-28 on mobile clears the floating StaggeredMenu bar (which overlays
-  // rather than pushing content down); tighter symmetric padding from md up.
   return (
-    <div className="mx-auto w-full max-w-content px-5 pb-12 pt-28 md:py-12">
+    <div className="mx-auto w-full max-w-content px-4 pb-14 pt-24 sm:px-6 md:px-8 md:py-12">
       {children}
     </div>
   );

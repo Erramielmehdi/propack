@@ -36,8 +36,8 @@ export function AdminLogin({ configured }: { configured: boolean }) {
   };
 
   return (
-    <div className="mx-auto max-w-sm">
-      <h1 className="mb-2 font-display text-3xl text-cream">Administration</h1>
+    <div className="mx-auto w-full max-w-sm">
+      <h1 className="mb-2 font-display text-3xl text-cream sm:text-4xl">Administration</h1>
       <p className="mb-6 text-sm text-cream/65">
         Accès sécurisé réservé à l'équipe ProPack.
       </p>
@@ -49,7 +49,7 @@ export function AdminLogin({ configured }: { configured: boolean }) {
         </div>
       )}
 
-      <form onSubmit={submit} className="surface space-y-4 p-6">
+      <form onSubmit={submit} className="surface space-y-4 rounded-lg p-4 sm:p-6">
         <Input
           id="admin-email"
           label="E-mail"

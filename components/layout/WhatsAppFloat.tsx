@@ -1,3 +1,6 @@
+"use client";
+
+import { usePathname } from "next/navigation";
 import { SITE } from "@/lib/content";
 
 /**
@@ -6,6 +9,10 @@ import { SITE } from "@/lib/content";
  * glyph carries the affordance.
  */
 export function WhatsAppFloat() {
+  const pathname = usePathname();
+
+  if (pathname.startsWith("/admin")) return null;
+
   return (
     <a
       href={`https://wa.me/${SITE.whatsapp}`}
